@@ -126,6 +126,12 @@ $prihlaseny_meno = $_SESSION["admin_name"] ?? "Lukáš";
 
 <main class="content-main">
 
-  <?php require __DIR__ . "/includes/invoices.php"; ?>
+  <?php 
+  if ( $page == "invoice" ) {
+    require __DIR__ . "/includes/invoice.php"; 
+  } else {
+    require __DIR__ . "/includes/invoices.php"; 
+  }
+  ?>
 
 </main>

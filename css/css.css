@@ -142,3 +142,57 @@ a {
 .button-light:hover {
   color: #172033; background: #d3d9e2;
 }
+.invoice-row {
+  cursor: pointer; user-select: none;
+}
+.invoice-summary {
+  display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); width: 100%; margin: 0 0 20px; border: 1px solid #dce1e8; background: #fff;
+}
+.invoice-summary_item {
+  display: flex; flex-direction: column; justify-content: center; min-height: 100px; padding: 18px 22px; border-right: 1px solid #e2e6ec;
+}
+.invoice-summary_item:last-child {
+  border-right: 0;
+}
+.invoice-summary_item span {
+  margin: 0 0 7px; font-size: 11px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #8791a1;
+}
+.invoice-summary_item strong {
+  font-size: 17px; line-height: 1.3; font-weight: 700; color: #172033;
+}
+.invoice-summary_item small {
+  margin: 4px 0 0; font-size: 12px; color: #8791a1;
+}
+.invoice-summary_item .status {
+  margin: 0; color: inherit;
+}
+.invoice-summary_customer {
+  min-width: 230px;
+}
+.shipping-highlight {
+  display: flex; align-items: stretch; justify-content: space-between; width: 100%; margin: 0 0 20px; color: #123d2a; background: #dff3e8; border-left: 8px solid #24a467;
+}
+.shipping-highlight > div {
+  display: flex; flex-direction: column; justify-content: center; min-height: 92px; padding: 18px 24px;
+}
+.shipping-highlight span {
+  margin: 0 0 6px; font-size: 11px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #3c765a;
+}
+.shipping-highlight strong {
+  font-size: 19px; line-height: 1.35; font-weight: 700; color: #123d2a;
+}
+.shipping-highlight small {
+  margin: 5px 0 0; font-size: 12px; color: #518068;
+}
+.shipping-location {
+  min-width: 190px; background: #c8ead7; border-left: 1px solid #acd9c0;
+}
+.shipping-location strong {
+  font-size: 24px;
+}
+.invoice-items-table .invoice-item_name {
+  width: 36%;
+}
+.invoice-item_amount {
+  min-width: 120px; font-size: 16px; font-weight: 700; color: #172033;
+}

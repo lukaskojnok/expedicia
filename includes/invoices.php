@@ -100,7 +100,14 @@ $status_classes = [
           $mena = $result["mena"] ?: "EUR";
           ?>
 
-          <tr class="<?= htmlspecialchars($row_class, ENT_QUOTES, "UTF-8") ?>">
+          <?php
+          $invoice_url = "/invoice?id=" . (int) $result["id"] . "&typ=" . urlencode($typ_kontroly);
+          ?>
+
+          <tr
+            class="invoice-row <?= htmlspecialchars($row_class, ENT_QUOTES, "UTF-8") ?>"
+            data-url="<?= htmlspecialchars($invoice_url, ENT_QUOTES, "UTF-8") ?>"
+          >
 
             <td>
               <div class="order-number">
@@ -190,7 +197,7 @@ $status_classes = [
 
             <td class="data-table_action">
               <a
-                href="/faktura.php?id=<?= (int) $result["id"] ?>&amp;typ=<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>"
+                href="<?= htmlspecialchars($invoice_url, ENT_QUOTES, "UTF-8") ?>"
                 class="<?= htmlspecialchars($button_class, ENT_QUOTES, "UTF-8") ?>"
               >
                 <?= htmlspecialchars($button_text, ENT_QUOTES, "UTF-8") ?>

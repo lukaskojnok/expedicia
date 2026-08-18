@@ -10,8 +10,6 @@ if (substr($_SERVER["DOCUMENT_ROOT"], -1) == "/") {
 define("DATAS_ROOT_SHORT", "data/");
 define("DATAS_ROOT", BASE_ROOT . DATAS_ROOT_SHORT);
 
-define("HAS_US", "dfJKkdsfas:dkf9Hd@sK");
-
 // define("IP_ADDRESS", $_SERVER["HTTP_CF_CONNECTING_IP"]);
 define("IP_ADDRESS", $_SERVER["REMOTE_ADDR"]);
 // define("COUNTRY", $_SERVER["HTTP_CF_IPCOUNTRY"]);
@@ -25,14 +23,6 @@ define("WEB_URL_ACTUAL", $_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOS
 define("WEB_URL_NAME", "expedicia.kojnok.sk");
 define("WEB_EMAIL_1", "novinky@expedicia.kojnok.sk");
 define("WEB_PHONE_1", "0000 111 222");
-
-define("WEB_EMAIL_SET_HOST", "smtp.m1.websupport.sk");
-// define("WEB_EMAIL_SET_USERNAME", "test@expedicia.kojnok.sk");
-// define("WEB_EMAIL_SET_PASSWORD", "Rrkoas_3#dhx*Y&Nil/M");
-// define("WEB_EMAIL_SET_FROM", "test@expedicia.kojnok.sk");
-define("WEB_EMAIL_SET_USERNAME", "novinky@expedicia.kojnok.sk");
-define("WEB_EMAIL_SET_PASSWORD", "8P6IQytK/");
-define("WEB_EMAIL_SET_FROM", "novinky@expedicia.kojnok.sk");
 
 $page = ( isset( $_GET["page"] ) ? $_GET["page"] : "" ); $page = strip_tags($page);
 $page2 = ( isset( $_GET["page2"] ) ? $_GET["page2"] : "" ); $page2 = strip_tags($page2);
