@@ -1,0 +1,6 @@
+/.vscode/sftp.json
+
+/config/psw.php
+/config/db.c.php
+
+/vendor/
