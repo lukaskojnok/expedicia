@@ -1,4 +1,34 @@
 <?php
+///////////////////////////////////////////////////////////////
+
+
+class Css_Js_Meta {
+  private $files_arr = [];
+  private $files_result_arr = [];
+
+  public function __construct( $files_arr = [] ) {
+    $this->files_arr = $files_arr;
+  }
+
+  public function merge() {
+    foreach ( $this->files_arr as $file ) {
+      $ext = explode(".", $file);
+      $ext = strtolower(end($ext));
+      if ( $ext == "css" ) {
+        $this->files_result_arr[] = '<link href="'.$file.'?v'.filemtime(BASE_ROOT . "/$file").'" type="text/css" rel="stylesheet" />';
+      } elseif ( $ext == "js" ) {
+        $this->files_result_arr[] = '<script src="'.$file.'?v'.filemtime(BASE_ROOT . "/$file").'" type="text/javascript"></script>';
+      }
+    }
+    return $this->files_result_arr["0"] ? implode( " ", $this->files_result_arr ) . "\n" : "";
+  }
+}
+
+
+///////////////////////////////////////////////////////////////
+
+
+
 function get_params( $w="" ) {
   global $PARAM, $PARAMQ;
 

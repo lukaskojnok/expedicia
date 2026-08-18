@@ -9,4 +9,8 @@ require_once("config/common.php");
 
 require_once("header_s.php");
 
+require_once("header_html.php");
+
 include("main.php");
+
+require_once("header_footer.php");
