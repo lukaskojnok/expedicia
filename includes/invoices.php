@@ -1,17 +1,3 @@
-<?php
-$status_labels = [
-  "nove" => "Nové",
-  "v_procese" => "V procese",
-  "ukoncene" => "Ukončené"
-];
-
-$status_classes = [
-  "nove" => "status-waiting",
-  "v_procese" => "status-active",
-  "ukoncene" => "status-done"
-];
-?>
-
 <div class="table-box">
 
   <table class="data-table">
@@ -89,6 +75,7 @@ $status_classes = [
           $zakaznik_mesto = $result["dodacie_mesto"] ?: $result["fakturacne_mesto"] ?: "—";
 
           $doprava_nazov = $result["doprava_nazov"] ?: "Neuvedená doprava";
+          $foxdeli_pick_up_place = $result["foxdeli_pick_up_place"];
 
           $suma_objednavky = number_format(
             (float) $result["cena_na_uhradu"],
@@ -153,6 +140,12 @@ $status_classes = [
               <?php if (!empty($result["doprava_kod"])) { ?>
                 <div class="table-sub-text">
                   <?= htmlspecialchars($result["doprava_kod"], ENT_QUOTES, "UTF-8") ?>
+                </div>
+              <?php } ?>
+
+              <?php if (!empty($foxdeli_pick_up_place)) { ?>
+                <div class="table-sub-text">
+                  <?= htmlspecialchars($foxdeli_pick_up_place, ENT_QUOTES, "UTF-8") ?>
                 </div>
               <?php } ?>
             </td>

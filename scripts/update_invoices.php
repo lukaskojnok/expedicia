@@ -24,6 +24,8 @@ $update_time_from_url = rawurlencode($date->format("Y-m-d H:i:s"));
 
 $url = "https://www.okfish.sk/export/ordersFeed.xml?patternId=53&partnerId=4&hash={$shoptet_orders_hash}&updateTimeFrom={$update_time_from_url}";
 
+echo "<a href='$url' target='_blank'>Načítať XML feed</a><br><br>";
+
 function xml_text($value): string {
   return trim((string) $value);
 }
@@ -132,6 +134,7 @@ try {
 
     $billing_address = $order->CUSTOMER->BILLING_ADDRESS;
     $shipping_address = $order->CUSTOMER->SHIPPING_ADDRESS;
+    $foxdeli = isset($order->FOXDELI) ? $order->FOXDELI : null;
 
     $items = [];
 
@@ -241,6 +244,13 @@ try {
       ":cislo_balika" => xml_nullable($order->PACKAGE_NUMBER),
       ":vaha_kg" => xml_decimal($order->WEIGHT, 3),
 
+      ":foxdeli_shipping_code" => $foxdeli !== null ? xml_nullable($foxdeli->SHIPPING_CODE) : null,
+      ":foxdeli_shipping_type" => $foxdeli !== null ? xml_nullable($foxdeli->SHIPPING_TYPE) : null,
+      ":foxdeli_delivery_price_to_pay" => $foxdeli !== null ? xml_decimal($foxdeli->DELIVERY_PRICE_TO_PAY, 2) : null,
+      ":foxdeli_pick_up_place" => $foxdeli !== null ? xml_nullable($foxdeli->PICK_UP_PLACE) : null,
+      ":foxdeli_currency_code" => $foxdeli !== null ? xml_nullable($foxdeli->CURRENCY_CODE) : null,
+      ":foxdeli_variable_symbol" => $foxdeli !== null ? xml_nullable($foxdeli->VARIABLE_SYMBOL) : null,
+
       ":poznamka_zakaznika" => xml_nullable($order->REMARK),
       ":poznamka_obchodu" => xml_nullable($order->SHOP_REMARK),
 
@@ -301,6 +311,13 @@ try {
 
           cislo_balika = :cislo_balika,
           vaha_kg = :vaha_kg,
+
+          foxdeli_shipping_code = :foxdeli_shipping_code,
+          foxdeli_shipping_type = :foxdeli_shipping_type,
+          foxdeli_delivery_price_to_pay = :foxdeli_delivery_price_to_pay,
+          foxdeli_pick_up_place = :foxdeli_pick_up_place,
+          foxdeli_currency_code = :foxdeli_currency_code,
+          foxdeli_variable_symbol = :foxdeli_variable_symbol,
 
           poznamka_zakaznika = :poznamka_zakaznika,
           poznamka_obchodu = :poznamka_obchodu,
@@ -368,6 +385,13 @@ try {
 
           cislo_balika = :cislo_balika,
           vaha_kg = :vaha_kg,
+
+          foxdeli_shipping_code = :foxdeli_shipping_code,
+          foxdeli_shipping_type = :foxdeli_shipping_type,
+          foxdeli_delivery_price_to_pay = :foxdeli_delivery_price_to_pay,
+          foxdeli_pick_up_place = :foxdeli_pick_up_place,
+          foxdeli_currency_code = :foxdeli_currency_code,
+          foxdeli_variable_symbol = :foxdeli_variable_symbol,
 
           poznamka_zakaznika = :poznamka_zakaznika,
           poznamka_obchodu = :poznamka_obchodu,
