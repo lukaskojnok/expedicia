@@ -30,13 +30,17 @@
     <meta property="og:image" content="<?php echo $meta["image"]; ?>" />
     <?php endif; ?>
 
-    <script src="/js/jquery-3.6.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="/js/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script> 
 
     <?php
     $Css_Js_Meta = new Css_Js_Meta( [ "/css/css.css" ] );
     echo $Css_Js_Meta->merge();
     ?>
 
-    <title><?php echo $meta["title"]; ?></title>
+    <title><?php echo $meta["title"] ?: $meta["title_primary"]; ?></title>
   </head>
   <body>

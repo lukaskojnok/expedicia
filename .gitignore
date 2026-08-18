@@ -2,5 +2,6 @@
 
 /config/psw.php
 /config/db.c.php
+/config/README.md
 
 /vendor/
