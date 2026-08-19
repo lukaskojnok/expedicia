@@ -105,7 +105,7 @@ function getShoptetProductImageUrl($code, $token) {
           // $produkt_obrazok = getShoptetProductImageUrl($produkt_kod, $shoptet_private_api_token);
           ?>
 
-          <tr>
+          <tr row_item_id="<?= $item["kod"]; ?>">
 
             <td class="invoice-item_image">
               <?php if ($produkt_obrazok !== NULL) { ?>
