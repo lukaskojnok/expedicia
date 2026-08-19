@@ -224,7 +224,7 @@ a {
 .invoice-item_code:hover {
   color: #ffffff !important; background-color: #246bfe !important;
 }
-.invoice-item_code.is-counted {
+.invoice-item_code.is-counted, .invoice-item_amount_control.is-counted {
   color: #ffffff !important; background-color: #22a96b !important;
 }
 .footbar_input.is-error {

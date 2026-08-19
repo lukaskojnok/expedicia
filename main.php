@@ -169,7 +169,7 @@ if (empty($page)) { //form
 
         const $row = $amountControl.closest("tr");
         const $codeCell = $row.find(".invoice-item_code");
-        const $amountCell = $row.find(".invoice-item_amount");
+        const $highlightCells = $codeCell.add($amountControl);
         const currentAmount = parseInt($amountControl.attr("item_amount"), 10) || 0;
 
         if (currentAmount <= 0 || $row.is("[hidden]")) {
@@ -180,21 +180,23 @@ if (empty($page)) { //form
         const newAmount = currentAmount - 1;
 
         $amountControl.attr("item_amount", newAmount).text(newAmount);
-        $amountCell.text(newAmount);
 
-        $codeCell.removeClass("is-counted");
+        clearTimeout($row.data("counted-timeout"));
+        $highlightCells.removeClass("is-counted");
 
         requestAnimationFrame(function() {
-          $codeCell.addClass("is-counted");
+          $highlightCells.addClass("is-counted");
         });
 
-        setTimeout(function() {
-          $codeCell.removeClass("is-counted");
+        if (newAmount === 0) {
+          $row.attr("hidden", "hidden");
+        }
 
-          if (newAmount === 0) {
-            $row.attr("hidden", "hidden");
-          }
+        const countedTimeout = setTimeout(function() {
+          $highlightCells.removeClass("is-counted");
         }, 2000);
+
+        $row.data("counted-timeout", countedTimeout);
 
         $barcodeInput.val("").trigger("focus");
       }
