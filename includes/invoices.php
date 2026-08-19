@@ -90,10 +90,11 @@
           <?php
           $invoice_url = "/invoice?id=" . (int) $result["id"] . "&typ=" . urlencode($typ_kontroly);
           ?>
-
           <tr
             class="invoice-row <?= htmlspecialchars($row_class, ENT_QUOTES, "UTF-8") ?>"
             data-url="<?= htmlspecialchars($invoice_url, ENT_QUOTES, "UTF-8") ?>"
+            data-invoice-number="<?= htmlspecialchars((string) $result["cislo_faktury"], ENT_QUOTES, "UTF-8") ?>"
+            data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
           >
 
             <td>

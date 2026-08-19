@@ -39,3 +39,140 @@
   ?>
 
 </main>
+
+
+
+<?php
+if (empty($page)) { //form
+?>
+<footer class="footbar">
+  <div class="footbar_inner">
+
+      <div class="footbar_title">
+        <strong>Načítať objednávku</strong>
+        <span>Naskenujte čiarový kód alebo ho napíšte ručne</span>
+      </div>
+
+      <form action="/" method="get" class="footbar_search" id="barcode-form-order">
+        <input
+          type="text"
+          name="code"
+          id="barcode-input"
+          class="footbar_input"
+          placeholder="Číslo objednávky alebo faktúry"
+          autocomplete="off"
+          autofocus
+        >
+
+        <button type="submit" class="footbar_button">Nájsť</button>
+      </form>
+
+      <script>
+      $(function() {
+        const $barcodeInput = $("#barcode-input");
+
+        $barcodeInput.trigger("focus");
+
+        $(window).on("focus", function() {
+          if (!$("body").hasClass("preloader-active")) {
+            $barcodeInput.trigger("focus");
+          }
+        });
+
+        $("#barcode-form-order").on("submit", function(e) {
+          e.preventDefault();
+
+          const code = ($barcodeInput.val() || "").trim();
+          let invoiceUrl = "";
+
+          if (code === "") {
+            $barcodeInput.trigger("focus");
+            return;
+          }
+
+          $(".invoice-row").each(function() {
+            const invoiceNumber = ($(this).attr("data-invoice-number") || "").trim();
+            const orderNumber = ($(this).attr("data-order-number") || "").trim();
+
+            if (code === invoiceNumber || code === orderNumber) {
+              invoiceUrl = $(this).attr("data-url") || "";
+              return false;
+            }
+          });
+
+          if (invoiceUrl !== "") {
+            showPreloader();
+            window.location.href = invoiceUrl;
+            return;
+          }
+
+          alert("Faktúra alebo objednávka s číslom " + code + " sa nenašla.");
+
+          $barcodeInput.val("").trigger("focus");
+        });
+      });
+      </script>
+
+  </div>
+</footer>
+<?php
+} else { //form
+?>
+<footer class="footbar">
+  <div class="footbar_inner">
+
+      <form action="/" method="get" class="footbar_search" id="barcode-form-item">
+        <input
+          type="text"
+          name="code"
+          id="barcode-input"
+          class="footbar_input"
+          placeholder="Kód produktu"
+          autocomplete="off"
+          autofocus
+        >
+
+        <button type="submit" class="footbar_button">Nájsť</button>
+      </form>
+
+      <script>
+      $(function() {
+        const $barcodeInput = $("#barcode-input");
+
+        $barcodeInput.trigger("focus");
+
+        $(window).on("focus", function() {
+          if (!$("body").hasClass("preloader-active")) {
+            $barcodeInput.trigger("focus");
+          }
+        });
+
+        $("#barcode-form-item").on("submit", function(e) {
+          e.preventDefault();
+
+          const code = ($barcodeInput.val() || "").trim();
+
+          if (code === "") {
+            $barcodeInput.trigger("focus");
+            return;
+          }
+
+          // showPreloader();
+
+          
+
+          $barcodeInput.val("").trigger("focus");
+        });
+      });
+      </script>
+
+  </div>
+</footer>
+<?php
+} //form
+?>
+
+
+<div class="preloader" id="page-preloader" aria-hidden="true">
+  <span class="preloader_spinner"></span>
+</div>

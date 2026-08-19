@@ -1,3 +1,37 @@
+<?php
+$shoptet_private_api_token = "";
+
+function getShoptetProductImageUrl($code, $token) {
+  $url = "https://api.myshoptet.com/api/products/code/" . rawurlencode($code) . "?include=images";
+
+  $ch = curl_init($url);
+
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+      "Shoptet-Private-API-Token: " . $token
+    ],
+    CURLOPT_TIMEOUT => 10
+  ]);
+
+  $response = json_decode(curl_exec($ch), true);
+
+  curl_close($ch);
+
+  $image = $response["data"]["images"][0]["seoName"] ?? "";
+
+  if ($image === "") {
+    return null;
+  }
+
+  if (empty($image)) {
+    return null;
+  } else
+  return "https://cdn.myshoptet.com/usr/www.okfish.sk/user/shop/detail/" . $image;
+}
+?>
+
+
 <section class="invoice-summary">
 
   <div class="invoice-summary_item">
@@ -36,38 +70,22 @@
     <strong><span class="status <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"><?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?></span></strong>
   </div>
 
-</section>
-
-<section class="shipping-highlight">
-  <div>
+  <div class="invoice-summary_item invoice-summary_shipping">
     <span>Spôsob doručenia</span>
     <strong><?= htmlspecialchars($doprava_nazov, ENT_QUOTES, "UTF-8") ?></strong>
 
-    <?php if (!empty($order["doprava_kod"])) { ?>
+    <?php if (!empty($order["ulozne_miesto"])) { ?>
+      <small><?= htmlspecialchars($order["ulozne_miesto"], ENT_QUOTES, "UTF-8") ?></small>
+    <?php } elseif (!empty($order["doprava_kod"])) { ?>
       <small><?= htmlspecialchars($order["doprava_kod"], ENT_QUOTES, "UTF-8") ?></small>
     <?php } ?>
   </div>
 
-  <?php if (!empty($order["ulozne_miesto"])) { ?>
-    <div class="shipping-location">
-      <span>Úložné miesto</span>
-      <strong><?= htmlspecialchars($order["ulozne_miesto"], ENT_QUOTES, "UTF-8") ?></strong>
-    </div>
-  <?php } ?>
 </section>
 
 <div class="table-box">
 
   <table class="data-table invoice-items-table">
-    <thead>
-      <tr>
-        <th>Kód</th>
-        <th>EAN</th>
-        <th>Produkt</th>
-        <th>Variant</th>
-        <th>Množstvo</th>
-      </tr>
-    </thead>
 
     <tbody>
 
@@ -81,16 +99,41 @@
             $mnozstvo = (int) $mnozstvo;
           }
 
-          $jednotkova_cena = number_format((float) $item["jednotkova_cena_s_dph"], 2, ",", " ");
-          $celkova_cena = number_format((float) $item["celkova_cena_s_dph"], 2, ",", " ");
+          $produkt_obrazok = "";
+          $produkt_kod = trim((string) $item["kod"]);
+
+          // $produkt_obrazok = getShoptetProductImageUrl($produkt_kod, $shoptet_private_api_token);
           ?>
 
           <tr>
-            <td><strong><?= htmlspecialchars($item["kod"] ?: "—", ENT_QUOTES, "UTF-8") ?></strong></td>
-            <td><?= htmlspecialchars($item["ean"] ?: "—", ENT_QUOTES, "UTF-8") ?></td>
-            <td class="invoice-item_name"><strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8") ?></strong></td>
+
+            <td class="invoice-item_image">
+              <?php if ($produkt_obrazok !== NULL) { ?>
+                <img src="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8") ?>" alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8") ?>">
+              <?php } else { ?>
+                <span>Bez obrázka</span>
+              <?php } ?>
+
+            </td>
+
+            <td class="invoice-item_code">
+              <strong><?= htmlspecialchars($item["kod"] ?: "—", ENT_QUOTES, "UTF-8") ?></strong>
+            </td>
+
+            <td class="invoice-item_name">
+              <strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8") ?></strong>
+            </td>
+
             <td><?= htmlspecialchars($item["variant_nazov"] ?: "—", ENT_QUOTES, "UTF-8") ?></td>
-            <td class="invoice-item_amount"><?= htmlspecialchars((string) $mnozstvo, ENT_QUOTES, "UTF-8") ?> <?= htmlspecialchars($item["jednotka"] ?: "ks", ENT_QUOTES, "UTF-8") ?></td>
+
+            <td class="invoice-item_amount">
+              <?= htmlspecialchars((string) $mnozstvo, ENT_QUOTES, "UTF-8") ?>
+            </td>
+
+            <td class="invoice-item_amount_control" item_id="<?= $item["kod"]; ?>" item_amount="<?= $mnozstvo; ?>">
+              <?= htmlspecialchars((string) $mnozstvo, ENT_QUOTES, "UTF-8") ?>
+            </td>
+
           </tr>
 
         <?php } ?>
@@ -98,7 +141,7 @@
       <?php } else { ?>
 
         <tr>
-          <td colspan="7" class="data-table_empty">Objednávka neobsahuje žiadne produktové položky.</td>
+          <td colspan="5" class="data-table_empty">Objednávka neobsahuje žiadne produktové položky.</td>
         </tr>
 
       <?php } ?>
@@ -108,6 +151,5 @@
 
 </div>
 
-zasilkovnaDistributionPointBranchId
-dpdServiceCode
-dpdPsId
+
+

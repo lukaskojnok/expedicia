@@ -34,3 +34,19 @@ $(function() {
     $(this).data("last-tap", now);
   });
 });
+
+
+
+function showPreloader() {
+  $("#page-preloader").addClass("is-active").attr("aria-hidden", "false");
+  $("body").addClass("preloader-active");
+}
+
+function hidePreloader() {
+  $("#page-preloader").removeClass("is-active").attr("aria-hidden", "true");
+  $("body").removeClass("preloader-active");
+}
+
+$(window).on("pageshow", function() {
+  hidePreloader();
+});

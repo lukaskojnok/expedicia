@@ -5,7 +5,7 @@ html, body {
   min-height: 100%;
 }
 body {
-  margin: 0; font-family: "Inter", sans-serif; font-size: 15px; line-height: 1.5; color: #172033; background: #f1f3f6;
+  margin: 0; font-family: "Inter", sans-serif; padding-bottom: 70px; font-size: 15px; line-height: 1.5; color: #172033; background: #f1f3f6;
 }
 a {
   color: inherit; text-decoration: none;
@@ -146,44 +146,51 @@ a {
   cursor: pointer; user-select: none;
 }
 .invoice-summary {
-  display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); width: 100%; margin: 0 0 20px; border: 1px solid #dce1e8; background: #fff;
+  position: sticky; z-index: 60; top: 72px; display: grid; grid-template-columns: minmax(145px, .9fr) minmax(120px, .8fr) minmax(210px, 1.2fr) minmax(170px, 1fr) minmax(90px, .55fr) minmax(140px, .85fr) minmax(120px, .75fr) minmax(260px, 1.45fr); width: 100%; margin: 0 0 12px; border: 1px solid #dce1e8; background: #fff; box-shadow: 0 5px 14px rgba(23, 32, 51, .08);
 }
 .invoice-summary_item {
-  display: flex; flex-direction: column; justify-content: center; min-height: 100px; padding: 18px 22px; border-right: 1px solid #e2e6ec;
+  display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 88px; padding: 14px 18px; border-right: 1px solid #e2e6ec;
 }
 .invoice-summary_item:last-child {
   border-right: 0;
 }
 .invoice-summary_item span {
-  margin: 0 0 7px; font-size: 11px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #8791a1;
+  margin: 0 0 6px; font-size: 10px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #8791a1;
 }
 .invoice-summary_item strong {
-  font-size: 17px; line-height: 1.3; font-weight: 700; color: #172033;
+  overflow: hidden; font-size: 15px; line-height: 1.3; font-weight: 700; text-overflow: ellipsis; color: #172033;
 }
 .invoice-summary_item small {
-  margin: 4px 0 0; font-size: 12px; color: #8791a1;
+  overflow: hidden; margin: 3px 0 0; font-size: 11px; line-height: 1.3; text-overflow: ellipsis; color: #8791a1;
 }
 .invoice-summary_item .status {
   margin: 0; color: inherit;
 }
 .invoice-summary_customer {
-  min-width: 230px;
+  min-width: 210px;
 }
-.shipping-highlight {
-  display: flex; align-items: stretch; justify-content: space-between; width: 100%; margin: 0 0 20px; color: #123d2a; background: #dff3e8; border-left: 8px solid #24a467;
+.invoice-summary_shipping {
+  padding-left: 22px; color: #123d2a; background: #dff3e8; border-left: 6px solid #24a467;
 }
-.shipping-highlight > div {
-  display: flex; flex-direction: column; justify-content: center; min-height: 92px; padding: 18px 24px;
+.invoice-summary_shipping span {
+  color: #3c765a;
 }
-.shipping-highlight span {
-  margin: 0 0 6px; font-size: 11px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #3c765a;
+.invoice-summary_shipping strong {
+  white-space: normal; color: #123d2a;
 }
-.shipping-highlight strong {
-  font-size: 19px; line-height: 1.35; font-weight: 700; color: #123d2a;
+.invoice-summary_shipping small {
+  color: #518068;
 }
-.shipping-highlight small {
-  margin: 5px 0 0; font-size: 12px; color: #518068;
+.invoice-items-table .invoice-item_name {
+  width: 45%;
 }
+.invoice-item_amount {
+  min-width: 60px; font-size: 18px !important; font-weight: 700; color: #172033; text-align: center;
+}
+.invoice-item_amount_control {
+  font-size: 28px !important; padding: 8px 25px !important; font-weight: 700 !important; text-align: center; color: #172033 !important; background-color: #eef2f7 !important;
+}
+
 .shipping-location {
   min-width: 190px; background: #c8ead7; border-left: 1px solid #acd9c0;
 }
@@ -195,4 +202,81 @@ a {
 }
 .invoice-item_amount {
   min-width: 120px; font-size: 16px; font-weight: 700; color: #172033;
+}
+.invoice-item_image {
+  width: 110px; padding: 8px 14px !important; text-align: center;
+}
+.invoice-item_image img {
+  display: block; width: 80px; height: 80px; margin: 0 auto; object-fit: contain;
+}
+.invoice-item_image span {
+  font-size: 11px; color: #9da5b2;
+}
+.invoice-items-table .invoice-item_name {
+  width: 45%;
+}
+.invoice-item_code {
+  padding: 8px 14px !important; text-align: center; color: #172033 !important; background-color: #eef2f7 !important; cursor: pointer; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+.invoice-item_code strong {
+  color: inherit !important;
+}
+.invoice-item_code:hover {
+  color: #ffffff !important; background-color: #246bfe !important;
+}
+
+.footbar {
+  position: fixed; z-index: 100; right: 0; bottom: 0; left: 0; display: flex; width: 100%; color: #fff; background: #172033; 
+}
+.footbar_inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 30px; width: 100%; height: 100%; padding: 14px 24px;
+}
+.footbar_title {
+  display: flex; flex-direction: column; min-width: 250px;
+}
+.footbar_title strong {
+  font-size: 16px; line-height: 1.3; font-weight: 700; color: #fff;
+}
+.footbar_title span {
+  margin: 3px 0 0; font-size: 12px; color: #aeb7c6;
+}
+.footbar_search {
+  display: flex; align-items: stretch; width: 100%; max-width: 720px; height: 56px;
+}
+.footbar_input {
+  width: 100%; height: 56px; padding: 0 20px; font-family: "Inter", sans-serif; font-size: 17px; font-weight: 600; color: #172033; background: #fff; border-right: 0; border-radius: 0; outline: 0; border: none;
+}
+.footbar_input:focus {
+  background: #f4f8ff; border-color: #5f91ff;
+}
+.footbar_input::placeholder {
+  font-size: 14px; font-weight: 400; color: #8a94a5;
+}
+.footbar_button {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 130px; height: 56px; padding: 0 24px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; color: #fff; background: #246bfe; border: 0; border-radius: 0; cursor: pointer;
+}
+.footbar_button:hover {
+  background: #1558da;
+}
+
+
+body.preloader-active {
+  overflow: hidden;
+}
+.preloader {
+  position: fixed; z-index: 1000; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; visibility: hidden; width: 100%; height: 100%; background: rgba(23, 32, 51, .78); opacity: 0; pointer-events: none; transition: opacity .2s, visibility .2s;
+}
+.preloader.is-active {
+  visibility: visible; opacity: 1; pointer-events: auto;
+}
+.preloader_spinner {
+  display: block; width: 58px; height: 58px; border: 5px solid rgba(255, 255, 255, .25); border-top-color: #246bfe; border-radius: 50%; animation: preloader-spin .7s linear infinite;
+}
+@keyframes preloader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
