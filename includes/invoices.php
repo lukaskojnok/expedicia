@@ -99,7 +99,7 @@
 
             <td>
               <div class="order-number">
-                <strong>
+                <strong nofocus>
                   <?= htmlspecialchars($result["cislo_faktury"] ?: "—", ENT_QUOTES, "UTF-8") ?>
                 </strong>
               </div>

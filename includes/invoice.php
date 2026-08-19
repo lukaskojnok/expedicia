@@ -36,7 +36,7 @@ function getShoptetProductImageUrl($code, $token) {
 
   <div class="invoice-summary_item">
     <span>Objednávka</span>
-    <strong><?= htmlspecialchars($order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?></strong>
+    <strong nofocus><?= htmlspecialchars($order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?></strong>
   </div>
 
   <div class="invoice-summary_item">

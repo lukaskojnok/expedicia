@@ -138,6 +138,44 @@ if (empty($page)) { //form
     <script>
     $(function() {
       const $barcodeInput = $("#barcode-input");
+      const $notFound = $("#product-not-found");
+      const $notFoundCodes = $("#product-not-found-codes");
+
+      function playWarningSound() {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContext) {
+          return;
+        }
+
+        const audioContext = new AudioContext();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "square";
+        oscillator.frequency.setValueAtTime(780, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(520, audioContext.currentTime + 0.16);
+        gain.gain.setValueAtTime(0.18, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.35);
+
+        oscillator.onended = function() {
+          audioContext.close();
+        };
+      }
+
+      function showProductNotFound(code) {
+        const $code = $("<strong>").text(code);
+
+        $notFoundCodes.append($code);
+        $notFound.addClass("is-active").attr("aria-hidden", "false");
+        playWarningSound();
+        $barcodeInput.val("").trigger("focus");
+      }
 
       function processItemCode(code) {
         code = String(code || "").trim();
@@ -157,13 +195,7 @@ if (empty($page)) { //form
         });
 
         if (!$amountControl.length) {
-          $barcodeInput.addClass("is-error");
-
-          setTimeout(function() {
-            $barcodeInput.removeClass("is-error");
-          }, 2000);
-
-          $barcodeInput.val("").trigger("focus");
+          showProductNotFound(code);
           return;
         }
 
@@ -180,26 +212,24 @@ if (empty($page)) { //form
         const newAmount = currentAmount - 1;
 
         $amountControl.attr("item_amount", newAmount).text(newAmount);
-
-        clearTimeout($row.data("counted-timeout"));
-        $highlightCells.removeClass("is-counted");
-
-        requestAnimationFrame(function() {
-          $highlightCells.addClass("is-counted");
-        });
+        $(".invoice-item_code, .invoice-item_amount_control").removeClass("is-counted");
 
         if (newAmount === 0) {
           $row.attr("hidden", "hidden");
+        } else {
+          $row.removeAttr("hidden");
+          $row.closest("tbody").prepend($row);
+          $highlightCells.addClass("is-counted");
         }
-
-        const countedTimeout = setTimeout(function() {
-          $highlightCells.removeClass("is-counted");
-        }, 2000);
-
-        $row.data("counted-timeout", countedTimeout);
 
         $barcodeInput.val("").trigger("focus");
       }
+
+      $notFound.on("click", function() {
+        $notFound.removeClass("is-active").attr("aria-hidden", "true");
+        $notFoundCodes.empty();
+        $barcodeInput.val("").trigger("focus");
+      });
 
       $barcodeInput.trigger("focus");
 
@@ -233,3 +263,13 @@ if (empty($page)) { //form
 <div class="preloader" id="page-preloader" aria-hidden="true">
   <span class="preloader_spinner"></span>
 </div>
+
+<?php if ($page === "invoice") { ?>
+  <div class="product-not-found" id="product-not-found" aria-hidden="true">
+    <div class="product-not-found_content">
+      <span>Produkt s týmto kódom nebol nájdený</span>
+      <div class="product-not-found_codes" id="product-not-found-codes"></div>
+      <small>Kliknutím kdekoľvek zatvorte hlášku</small>
+    </div>
+  </div>
+<?php } ?>

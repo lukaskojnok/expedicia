@@ -50,3 +50,21 @@ function hidePreloader() {
 $(window).on("pageshow", function() {
   hidePreloader();
 });
+
+
+
+$(function() {
+  const $barcodeInput = $("#barcode-input");
+
+  if (!$barcodeInput.length) {
+    return;
+  }
+
+  $(document).on("click", function(e) {
+    if ($(e.target).closest("[nofocus]").length) {
+      return;
+    }
+
+    $barcodeInput.trigger("focus");
+  });
+});
