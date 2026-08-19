@@ -216,13 +216,19 @@ a {
   width: 45%;
 }
 .invoice-item_code {
-  padding: 8px 14px !important; text-align: center; color: #172033 !important; background-color: #eef2f7 !important; cursor: pointer; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  padding: 8px 14px !important; text-align: center; color: #172033 !important; background-color: #eef2f7 !important; cursor: pointer; user-select: none; transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
 }
 .invoice-item_code strong {
   color: inherit !important;
 }
 .invoice-item_code:hover {
   color: #ffffff !important; background-color: #246bfe !important;
+}
+.invoice-item_code.is-counted {
+  color: #ffffff !important; background-color: #22a96b !important;
+}
+.footbar_input.is-error {
+  color: #b42318; background-color: #fff0ee; box-shadow: inset 0 0 0 2px #e74c3c;
 }
 
 .footbar {

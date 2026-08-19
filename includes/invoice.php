@@ -105,35 +105,42 @@ function getShoptetProductImageUrl($code, $token) {
           // $produkt_obrazok = getShoptetProductImageUrl($produkt_kod, $shoptet_private_api_token);
           ?>
 
-          <tr row_item_id="<?= $item["kod"]; ?>">
-
+          <tr row_item_id="<?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?>">
             <td class="invoice-item_image">
-              <?php if ($produkt_obrazok !== NULL) { ?>
-                <img src="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8") ?>" alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8") ?>">
-              <?php } else { ?>
-                <span>Bez obrázka</span>
+              <?php if (!empty($item["image"])) { ?>
+                <img
+                  src="<?= htmlspecialchars($item["image"], ENT_QUOTES, "UTF-8"); ?>"
+                  alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?>"
+                >
               <?php } ?>
-
             </td>
 
-            <td class="invoice-item_code">
-              <strong><?= htmlspecialchars($item["kod"] ?: "—", ENT_QUOTES, "UTF-8") ?></strong>
+            <td
+              class="invoice-item_code"
+              item_id="<?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?>"
+            >
+              <strong><?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?></strong>
             </td>
 
             <td class="invoice-item_name">
-              <strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8") ?></strong>
+              <strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?></strong>
             </td>
 
-            <td><?= htmlspecialchars($item["variant_nazov"] ?: "—", ENT_QUOTES, "UTF-8") ?></td>
+            <td>
+              <?= !empty($item["variant"]) ? htmlspecialchars($item["variant"], ENT_QUOTES, "UTF-8") : "—"; ?>
+            </td>
 
             <td class="invoice-item_amount">
-              <?= htmlspecialchars((string) $mnozstvo, ENT_QUOTES, "UTF-8") ?>
+              <?= (int) $item["mnozstvo"]; ?>
             </td>
 
-            <td class="invoice-item_amount_control" item_id="<?= $item["kod"]; ?>" item_amount="<?= $mnozstvo; ?>">
-              <?= htmlspecialchars((string) $mnozstvo, ENT_QUOTES, "UTF-8") ?>
+            <td
+              class="invoice-item_amount_control"
+              item_id="<?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?>"
+              item_amount="<?= (int) $item["mnozstvo"]; ?>"
+            >
+              <?= (int) $item["mnozstvo"]; ?>
             </td>
-
           </tr>
 
         <?php } ?>

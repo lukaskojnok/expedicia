@@ -121,50 +121,105 @@ if (empty($page)) { //form
 <footer class="footbar">
   <div class="footbar_inner">
 
-      <form action="/" method="get" class="footbar_search" id="barcode-form-item">
-        <input
-          type="text"
-          name="code"
-          id="barcode-input"
-          class="footbar_input"
-          placeholder="Kód produktu"
-          autocomplete="off"
-          autofocus
-        >
+    <form action="/" method="get" class="footbar_search" id="barcode-form-item">
+      <input
+        type="text"
+        name="code"
+        id="barcode-input"
+        class="footbar_input"
+        placeholder="Kód produktu"
+        autocomplete="off"
+        autofocus
+      >
 
-        <button type="submit" class="footbar_button">Nájsť</button>
-      </form>
+      <button type="submit" class="footbar_button">Nájsť</button>
+    </form>
 
-      <script>
-      $(function() {
-        const $barcodeInput = $("#barcode-input");
+    <script>
+    $(function() {
+      const $barcodeInput = $("#barcode-input");
 
-        $barcodeInput.trigger("focus");
+      function processItemCode(code) {
+        code = String(code || "").trim();
 
-        $(window).on("focus", function() {
-          if (!$("body").hasClass("preloader-active")) {
-            $barcodeInput.trigger("focus");
+        if (code === "") {
+          $barcodeInput.trigger("focus");
+          return;
+        }
+
+        let $amountControl = $();
+
+        $(".invoice-item_amount_control").each(function() {
+          if (String($(this).attr("item_id") || "").trim() === code) {
+            $amountControl = $(this);
+            return false;
           }
         });
 
-        $("#barcode-form-item").on("submit", function(e) {
-          e.preventDefault();
+        if (!$amountControl.length) {
+          $barcodeInput.addClass("is-error");
 
-          const code = ($barcodeInput.val() || "").trim();
-
-          if (code === "") {
-            $barcodeInput.trigger("focus");
-            return;
-          }
-
-          // showPreloader();
-
-          
+          setTimeout(function() {
+            $barcodeInput.removeClass("is-error");
+          }, 2000);
 
           $barcodeInput.val("").trigger("focus");
+          return;
+        }
+
+        const $row = $amountControl.closest("tr");
+        const $codeCell = $row.find(".invoice-item_code");
+        const $amountCell = $row.find(".invoice-item_amount");
+        const currentAmount = parseInt($amountControl.attr("item_amount"), 10) || 0;
+
+        if (currentAmount <= 0 || $row.is("[hidden]")) {
+          $barcodeInput.val("").trigger("focus");
+          return;
+        }
+
+        const newAmount = currentAmount - 1;
+
+        $amountControl.attr("item_amount", newAmount).text(newAmount);
+        $amountCell.text(newAmount);
+
+        $codeCell.removeClass("is-counted");
+
+        requestAnimationFrame(function() {
+          $codeCell.addClass("is-counted");
         });
+
+        setTimeout(function() {
+          $codeCell.removeClass("is-counted");
+
+          if (newAmount === 0) {
+            $row.attr("hidden", "hidden");
+          }
+        }, 2000);
+
+        $barcodeInput.val("").trigger("focus");
+      }
+
+      $barcodeInput.trigger("focus");
+
+      $(window).on("focus", function() {
+        if (!$("body").hasClass("preloader-active")) {
+          $barcodeInput.trigger("focus");
+        }
       });
-      </script>
+
+      $("#barcode-form-item").on("submit", function(e) {
+        e.preventDefault();
+        processItemCode($barcodeInput.val());
+      });
+
+      $(".invoice-item_code").on("dblclick", function() {
+        const code = String($(this).attr("item_id") || "").trim();
+
+        $barcodeInput.val(code);
+        $("#barcode-form-item").trigger("submit");
+      });
+    });
+    </script>
 
   </div>
 </footer>
