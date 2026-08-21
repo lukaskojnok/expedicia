@@ -1,4 +1,35 @@
 <?php
+$DOPRAVA_KODY = [
+  "SHIPPING4" => "Osobný odber",
+  "SHIPPING62" => "Packeta Zásielkovňa",
+  "SHIPPING65" => "DPD – odberné miesto",
+  "SHIPPING68" => "DPD – doručenie na adresu"
+];
+define("DOPRAVA_KODY", $DOPRAVA_KODY);
+
+/*
+ * =========================================================
+ * DPD PRODUKTY
+ * =========================================================
+ */
+$dpd_products = [
+  1 => "DPD Classic",
+  2 => "DPD 18:00",
+  3 => "DPD 10:00",
+  4 => "DPD 12:00",
+  5 => "DPD COD",
+  6 => "Saturday Delivery",
+  7 => "Small Parcel",
+  8 => "DPD Guarantee",
+  9 => "DPD Home",
+  10 => "City Service Standard",
+  17 => "DPD Pickup miesto"
+];
+
+
+
+
+
 $GLOBALS["pageURL2"] = "expedicia.kojnok.sk";
 
 if (substr($_SERVER["DOCUMENT_ROOT"], -1) == "/") {

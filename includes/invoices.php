@@ -149,6 +149,12 @@
                   <?= htmlspecialchars($foxdeli_pick_up_place, ENT_QUOTES, "UTF-8") ?>
                 </div>
               <?php } ?>
+
+              <?php if (!isset(DOPRAVA_KODY[$result["doprava_kod"]])) { ?>
+                <div class="shipping-warning">
+                  Tento druh dopravy nie je zaznamenaný v systéme. Kontaktujte administrátora.
+                </div>
+              <?php } ?>
             </td>
 
             <td>

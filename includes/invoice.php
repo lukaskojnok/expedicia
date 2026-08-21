@@ -83,7 +83,7 @@ function getShoptetProductImageUrl($code, $token) {
 
 </section>
 
-<div class="table-box">
+<div class="table-box" id="invoice-items-box">
 
   <table class="data-table invoice-items-table">
 
@@ -158,5 +158,8 @@ function getShoptetProductImageUrl($code, $token) {
 
 </div>
 
-
+<div class="invoice-control-success" id="invoice-control-success" hidden>
+  <strong>Kontrola bola úspešná</strong>
+  <span>Všetky produkty z objednávky boli skontrolované.</span>
+</div>
 

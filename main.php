@@ -139,6 +139,7 @@ if (empty($page)) { //form
     $(function() {
       const $barcodeInput = $("#barcode-input");
       const $notFound = $("#product-not-found");
+      const $notFoundTitle = $("#product-not-found-title");
       const $notFoundCodes = $("#product-not-found-codes");
 
       function playWarningSound() {
@@ -168,13 +169,32 @@ if (empty($page)) { //form
         };
       }
 
-      function showProductNotFound(code) {
+      function showScanError(message, code) {
         const $code = $("<strong>").text(code);
 
+        $notFoundTitle.text(message);
         $notFoundCodes.append($code);
         $notFound.addClass("is-active").attr("aria-hidden", "false");
         playWarningSound();
         $barcodeInput.val("").trigger("focus");
+      }
+
+      function showSuccessfulControl() {
+        let hasRemainingItems = false;
+
+        $(".invoice-item_amount_control").each(function() {
+          const amount = parseInt($(this).attr("item_amount"), 10) || 0;
+
+          if (amount > 0) {
+            hasRemainingItems = true;
+            return false;
+          }
+        });
+
+        if (!hasRemainingItems) {
+          $("#invoice-items-box").attr("hidden", "hidden");
+          $("#invoice-control-success").removeAttr("hidden");
+        }
       }
 
       function processItemCode(code) {
@@ -195,7 +215,7 @@ if (empty($page)) { //form
         });
 
         if (!$amountControl.length) {
-          showProductNotFound(code);
+          showScanError("Produkt s týmto kódom nebol nájdený", code);
           return;
         }
 
@@ -205,7 +225,7 @@ if (empty($page)) { //form
         const currentAmount = parseInt($amountControl.attr("item_amount"), 10) || 0;
 
         if (currentAmount <= 0 || $row.is("[hidden]")) {
-          $barcodeInput.val("").trigger("focus");
+          showScanError("Produkt je naskenovaný navyše", code);
           return;
         }
 
@@ -216,6 +236,7 @@ if (empty($page)) { //form
 
         if (newAmount === 0) {
           $row.attr("hidden", "hidden");
+          showSuccessfulControl();
         } else {
           $row.removeAttr("hidden");
           $row.closest("tbody").prepend($row);
@@ -267,7 +288,7 @@ if (empty($page)) { //form
 <?php if ($page === "invoice") { ?>
   <div class="product-not-found" id="product-not-found" aria-hidden="true">
     <div class="product-not-found_content">
-      <span>Produkt s týmto kódom nebol nájdený</span>
+      <span id="product-not-found-title">Produkt s týmto kódom nebol nájdený</span>
       <div class="product-not-found_codes" id="product-not-found-codes"></div>
       <small>Kliknutím kdekoľvek zatvorte hlášku</small>
     </div>
