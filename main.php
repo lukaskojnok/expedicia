@@ -40,6 +40,22 @@
 
 </main>
 
+<div class="order-logs-modal" id="order-logs-modal" aria-hidden="true" hidden nofocus>
+  <div class="order-logs-modal_backdrop" data-order-logs-close></div>
+  <section class="order-logs-modal_dialog" role="dialog" aria-modal="true" aria-labelledby="order-logs-modal-title">
+    <header class="order-logs-modal_header">
+      <div>
+        <span>História objednávky</span>
+        <strong id="order-logs-modal-title">—</strong>
+      </div>
+      <button type="button" class="order-logs-modal_close" data-order-logs-close aria-label="Zatvoriť">×</button>
+    </header>
+    <div class="order-logs-modal_body" id="order-logs-modal-body">
+      <div class="order-logs-loading">Načítavam históriu…</div>
+    </div>
+  </section>
+</div>
+
 
 
 <?php
@@ -304,8 +320,12 @@ if (empty($page)) { //form
       }
 
       const $parcels = $("#shipment-parcels");
-      const $shipmentSubmit = $("#shipment-submit");
+      const $shipmentButtons = $(".shipment-submit[data-print-label]");
       const $shipmentMessage = $("#shipment-message");
+      const $shipmentErrorJson = $("#shipment-error-json");
+      const $shipmentCompleted = $("#shipment-completed");
+      const $shipmentCompletedWarning = $("#shipment-completed-warning");
+      const $shipmentCompletedLabels = $("#shipment-completed-labels");
       let $activeWeight = $parcels.find(".shipment-weight").first();
 
       function updateParcelLabels() {
@@ -331,7 +351,62 @@ if (empty($page)) { //form
       }
 
       function updateShipmentSubmit() {
-        $shipmentSubmit.prop("disabled", getShipmentWeights().length === 0);
+        $shipmentButtons.prop("disabled", getShipmentWeights().length === 0);
+      }
+
+      function formatApiResponse(apiResponse) {
+        if (apiResponse && typeof apiResponse === "object") {
+          return JSON.stringify(apiResponse, null, 2);
+        }
+
+        const responseText = String(apiResponse || "").trim();
+
+        if (responseText === "") {
+          return JSON.stringify({
+            success: false,
+            message: "Server ani dopravca nevrátili JSON odpoveď."
+          }, null, 2);
+        }
+
+        try {
+          return JSON.stringify(JSON.parse(responseText), null, 2);
+        } catch (error) {
+          return responseText;
+        }
+      }
+
+      function showShipmentError(message, apiResponse) {
+        $shipmentMessage.removeClass("is-success").addClass("is-error").text(message || "Zásielku sa nepodarilo odoslať.");
+        $shipmentErrorJson.text(formatApiResponse(apiResponse)).removeAttr("hidden");
+        updateShipmentSubmit();
+      }
+
+      function showShipmentCompleted(response) {
+        $shipmentForm.attr("hidden", "hidden");
+        $shipmentCompleted.removeAttr("hidden");
+        $shipmentCompletedLabels.empty();
+        $(".order-logs-open")
+          .removeClass("status-waiting status-active")
+          .addClass("status-done")
+          .text("Ukončené");
+
+        if (response.warning) {
+          $shipmentCompletedWarning.text(response.warning).removeAttr("hidden");
+        } else {
+          $shipmentCompletedWarning.attr("hidden", "hidden").text("");
+        }
+
+        $.each(response.label_files || [], function(index, file) {
+          const linkText = (response.label_files || []).length > 1
+            ? "Stiahnuť štítok " + (index + 1)
+            : "Stiahnuť štítok";
+
+          $("<a>", {
+            href: file.url,
+            text: linkText,
+            download: file.name || "stitok"
+          }).appendTo($shipmentCompletedLabels);
+        });
       }
 
       function selectWeight($input) {
@@ -398,6 +473,11 @@ if (empty($page)) { //form
 
       $shipmentForm.on("submit", function(event) {
         event.preventDefault();
+      });
+
+      $shipmentButtons.on("click", function() {
+        const $clickedButton = $(this);
+        const printLabel = String($clickedButton.data("print-label")) === "1";
 
         const weights = getShipmentWeights();
 
@@ -405,8 +485,10 @@ if (empty($page)) { //form
           return;
         }
 
-        $shipmentSubmit.prop("disabled", true).text("Odosielam…");
+        $shipmentButtons.prop("disabled", true);
+        $clickedButton.text("Odosielam…");
         $shipmentMessage.removeClass("is-error is-success").text("");
+        $shipmentErrorJson.attr("hidden", "hidden").text("");
 
         $.ajax({
           url: "/scripts/send_data.php",
@@ -415,21 +497,47 @@ if (empty($page)) { //form
           data: {
             order_id: $shipmentForm.data("order-id"),
             typ_kontroly: $shipmentForm.data("control-type"),
-            weights: weights
+            weights: weights,
+            print_label: printLabel ? 1 : 0
           }
         }).done(function(response) {
           if (response.success) {
-            $shipmentMessage.addClass("is-success").text(response.message || "Zásielka bola odoslaná dopravcovi.");
-            $shipmentSubmit.text("Odoslané dopravcovi");
+            showShipmentCompleted(response);
+
+            if (printLabel && response.print_url) {
+              $("#shipment-label-print-frame").remove();
+
+              $("<iframe>", {
+                id: "shipment-label-print-frame",
+                src: response.print_url,
+                title: "Tlač štítku",
+                css: {
+                  position: "fixed",
+                  width: "1px",
+                  height: "1px",
+                  right: "0",
+                  bottom: "0",
+                  opacity: "0",
+                  border: "0",
+                  pointerEvents: "none"
+                }
+              }).appendTo("body");
+            }
+
             return;
           }
 
-          $shipmentMessage.addClass("is-error").text(response.message || "Zásielku sa nepodarilo odoslať.");
-          $shipmentSubmit.prop("disabled", false).text("Poslať dopravcovi");
+          showShipmentError(response.message, response.api_response || response);
         }).fail(function(xhr) {
           const response = xhr.responseJSON || {};
-          $shipmentMessage.addClass("is-error").text(response.message || "Nastala chyba pri komunikácii so serverom.");
-          $shipmentSubmit.prop("disabled", false).text("Poslať dopravcovi");
+          const rawResponse = response.api_response || xhr.responseText || response;
+
+          showShipmentError(response.message || "Nastala neznáma chyba pri komunikácii so serverom.", rawResponse);
+        }).always(function() {
+          $shipmentButtons.each(function() {
+            const printValue = String($(this).data("print-label"));
+            $(this).text(printValue === "1" ? "Poslať a vytlačiť štítok" : "Poslať bez vytlačenia");
+          });
         });
       });
 

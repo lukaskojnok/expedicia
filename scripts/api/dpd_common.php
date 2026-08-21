@@ -29,15 +29,82 @@ function dpd_country_code($country) {
   return 703;
 }
 
-function dpd_normalized_response($success, $message, $http_code, $response_code, $response, $reference) {
+function dpd_normalized_response($success, $message, $http_code, $response_code, $response, $reference, $labels = []) {
   return [
     "success" => $success,
     "message" => $message,
     "http_code" => $http_code,
     "response_code" => $response_code,
     "response" => $response,
-    "reference" => $reference
+    "reference" => $reference,
+    "labels" => $labels
   ];
+}
+
+function dpd_extract_labels($response_data) {
+  $label_keys = [
+    "label",
+    "labels",
+    "labelfile",
+    "labeldata",
+    "pdfbase64",
+    "parcellabelspdf"
+  ];
+  $labels = [];
+
+  $walk = function($value, $key = "", $label_context = false) use (&$walk, &$labels, $label_keys) {
+    $normalized_key = strtolower(preg_replace('/[^a-z0-9]/i', '', (string) $key));
+    $is_label_key = in_array($normalized_key, $label_keys, true);
+    $is_label_context = $label_context || $is_label_key;
+
+    if (is_string($value) && $is_label_context && trim($value) !== "") {
+      $labels[] = [
+        "content" => $value,
+        "mime_type" => "application/pdf",
+        "extension" => "pdf"
+      ];
+      return;
+    }
+
+    if (!is_array($value)) {
+      return;
+    }
+
+    if ($is_label_context) {
+      $content = $value["content"] ?? $value["data"] ?? $value["base64"] ?? $value["file"] ?? null;
+
+      if (is_string($content) && trim($content) !== "") {
+        $labels[] = [
+          "content" => $content,
+          "mime_type" => $value["mime_type"] ?? $value["mimeType"] ?? "application/pdf",
+          "extension" => $value["extension"] ?? "pdf"
+        ];
+        return;
+      }
+    }
+
+    foreach ($value as $child_key => $child_value) {
+      $child_is_numeric = is_int($child_key) || ctype_digit((string) $child_key);
+      $walk($child_value, $child_key, $is_label_context && $child_is_numeric);
+    }
+  };
+
+  $walk($response_data);
+  $unique_labels = [];
+  $seen = [];
+
+  foreach ($labels as $label) {
+    $hash = hash("sha256", (string) $label["content"]);
+
+    if (isset($seen[$hash])) {
+      continue;
+    }
+
+    $seen[$hash] = true;
+    $unique_labels[] = $label;
+  }
+
+  return $unique_labels;
 }
 
 function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
@@ -186,5 +253,7 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
     return dpd_normalized_response(false, $error_message, $http_code, 422, (string) $response, $reference);
   }
 
-  return dpd_normalized_response(true, "Zásielka bola úspešne odoslaná do DPD.", $http_code, 200, (string) $response, $reference);
+  $labels = dpd_extract_labels($response_data);
+
+  return dpd_normalized_response(true, "Zásielka bola úspešne odoslaná do DPD.", $http_code, 200, (string) $response, $reference, $labels);
 }
