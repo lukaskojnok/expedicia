@@ -141,6 +141,25 @@ if (empty($page)) { //form
       const $notFound = $("#product-not-found");
       const $notFoundTitle = $("#product-not-found-title");
       const $notFoundCodes = $("#product-not-found-codes");
+      let controlLogSent = false;
+
+      function logSuccessfulControl() {
+        if (controlLogSent) {
+          return;
+        }
+
+        controlLogSent = true;
+
+        $.ajax({
+          url: "/scripts/control_log.php",
+          method: "POST",
+          dataType: "json",
+          data: {
+            order_id: $("#shipment-form").data("order-id") || <?= (int) $order_id ?>,
+            typ_kontroly: "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>"
+          }
+        });
+      }
 
       function playWarningSound() {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -195,6 +214,7 @@ if (empty($page)) { //form
           $("#invoice-items-box").attr("hidden", "hidden");
           $("#invoice-control-success").removeAttr("hidden");
           $(".footbar").attr("hidden", "hidden");
+          logSuccessfulControl();
 
           setTimeout(function() {
             $(".shipment-weight").first().trigger("focus");
@@ -372,7 +392,7 @@ if (empty($page)) { //form
           value += key;
         }
 
-        $activeWeight.val(value).trigger("focus");
+        $activeWeight.val(value);
         updateShipmentSubmit();
       });
 
@@ -392,7 +412,11 @@ if (empty($page)) { //form
           url: "/scripts/send_data.php",
           method: "POST",
           dataType: "json",
-          data: { order_id: $shipmentForm.data("order-id"), weights: weights }
+          data: {
+            order_id: $shipmentForm.data("order-id"),
+            typ_kontroly: $shipmentForm.data("control-type"),
+            weights: weights
+          }
         }).done(function(response) {
           if (response.success) {
             $shipmentMessage.addClass("is-success").text(response.message || "Zásielka bola odoslaná dopravcovi.");

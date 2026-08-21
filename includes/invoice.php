@@ -160,9 +160,9 @@ function getShoptetProductImageUrl($code, $token) {
 
 <div class="invoice-control-success" id="invoice-control-success" hidden>
   <?php if (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
-    <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" nofocus>
-      <div class="shipment-form_body">
-        <div class="shipment-form_left">
+    <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" data-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>" nofocus>
+      <div class="shipment-layout">
+        <div class="shipment-panel shipment-panel_weights">
           <div class="shipment-form_header">
             <strong>Hmotnosť balíkov</strong>
             <span>Hmotnosť zadávaj v kilogramoch.</span>
@@ -190,7 +190,7 @@ function getShoptetProductImageUrl($code, $token) {
           <button type="button" class="shipment-add-parcel" id="shipment-add-parcel">+ Ďalší balík</button>
           <button type="submit" class="shipment-submit" id="shipment-submit" disabled>Poslať dopravcovi</button>
         </div>
-        <div class="shipment-form_right">
+        <div class="shipment-panel shipment-panel_keypad">
           <div class="shipment-keypad" id="shipment-keypad" aria-label="Numerická klávesnica">
             <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
             <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>

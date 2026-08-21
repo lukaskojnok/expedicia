@@ -29,22 +29,33 @@ function dpd_country_code($country) {
   return 703;
 }
 
+function dpd_normalized_response($success, $message, $http_code, $response_code, $response, $reference) {
+  return [
+    "success" => $success,
+    "message" => $message,
+    "http_code" => $http_code,
+    "response_code" => $response_code,
+    "response" => $response,
+    "reference" => $reference
+  ];
+}
+
 function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
   $order = $shipment_data["order"];
   $shipping = $shipment_data["shipping"];
   $weights = $shipment_data["weights"];
   $product = (int) ($shipping["product"] ?? 0);
   $is_parcelshop_delivery = $product === 17;
+  $reference = trim((string) ($order["cislo_objednavky"] ?: $order["id"]));
 
   if (!defined("DPD_URL") || !defined("DPD_KEY") || !defined("DPD_EMAIL") || !defined("DPD_DELIS_ID") || !defined("DPD_ZVOZOVA_ADRESA_1")) {
-    return ["success" => false, "message" => "Chýbajú DPD prihlasovacie údaje v konfigurácii.", "http_code" => 500];
+    return dpd_normalized_response(false, "Chýbajú DPD prihlasovacie údaje v konfigurácii.", 0, 500, "", $reference);
   }
 
   if ($is_parcelshop_delivery && $parcelshop_id === "") {
-    return ["success" => false, "message" => "Pri DPD odbernom mieste chýba parcelShopId. Do importu treba uložiť presné DPD ID odberného miesta.", "http_code" => 422];
+    return dpd_normalized_response(false, "Pri DPD odbernom mieste chýba parcelShopId.", 0, 422, "", $reference);
   }
 
-  $reference = trim((string) ($order["cislo_objednavky"] ?: $order["id"]));
   $recipient_name = trim((string) ($order["dodacie_meno"] ?: $order["fakturacne_meno"]));
   $recipient_street = trim((string) ($order["dodacia_ulica"] ?: $order["fakturacna_ulica"]));
   $recipient_house_number = trim((string) ($order["dodacie_cislo_domu"] ?: $order["fakturacne_cislo_domu"]));
@@ -52,12 +63,25 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
   $recipient_city = trim((string) ($order["dodacie_mesto"] ?: $order["fakturacne_mesto"]));
 
   if ($recipient_name === "" || $recipient_zip === "" || $recipient_city === "") {
-    return ["success" => false, "message" => "Objednávka nemá úplnú dodaciu adresu.", "http_code" => 422];
+    return dpd_normalized_response(false, "Objednávka nemá úplnú dodaciu adresu.", 0, 422, "", $reference);
   }
 
   $parcels = [];
 
   foreach ($weights as $index => $weight) {
+    if ($weight > 31.5) {
+      $parcel_number = $index + 1;
+
+      return dpd_normalized_response(
+        false,
+        "Balík {$parcel_number} presahuje maximálnu povolenú hmotnosť DPD 31,5 kg.",
+        0,
+        422,
+        "",
+        $reference
+      );
+    }
+
     $parcels[] = [
       "reference1" => $reference,
       "reference2" => "BALIK-" . ($index + 1),
@@ -122,15 +146,45 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
   curl_close($curl);
 
   if ($curl_error !== "") {
-    return ["success" => false, "message" => "DPD spojenie zlyhalo: " . $curl_error, "http_code" => 502];
+    return dpd_normalized_response(false, "DPD spojenie zlyhalo: " . $curl_error, 0, 502, "", $reference);
   }
 
   $response_data = json_decode($response, true);
 
-  if ($http_code < 200 || $http_code >= 300 || !empty($response_data["error"])) {
-    $error_message = $response_data["error"]["message"] ?? "DPD odmietlo vytvorenie zásielky.";
-    return ["success" => false, "message" => $error_message, "http_code" => 422];
+  if (!is_array($response_data)) {
+    return dpd_normalized_response(false, "DPD vrátilo neplatnú odpoveď.", $http_code, 502, (string) $response, $reference);
   }
 
-  return ["success" => true, "message" => "Zásielka bola úspešne odoslaná do DPD.", "http_code" => 200];
+  if ($http_code < 200 || $http_code >= 300 || !empty($response_data["error"])) {
+    $error_message = $response_data["error"]["message"] ?? "DPD odmietlo vytvorenie zásielky.";
+    return dpd_normalized_response(false, $error_message, $http_code, 422, (string) $response, $reference);
+  }
+
+  $shipment_result = $response_data["result"]["result"][0] ?? null;
+
+  if (!is_array($shipment_result) || !array_key_exists("success", $shipment_result)) {
+    return dpd_normalized_response(false, "DPD nevrátilo výsledok vytvorenia zásielky.", $http_code, 502, (string) $response, $reference);
+  }
+
+  $reference = trim((string) ($shipment_result["reference"] ?? $reference));
+  $dpd_success = $shipment_result["success"] === true;
+
+  if (!$dpd_success) {
+    $messages = $shipment_result["messages"] ?? [];
+
+    if (!is_array($messages)) {
+      $messages = [(string) $messages];
+    }
+
+    $messages = array_values(array_filter(array_map(function($message) {
+      return trim((string) $message);
+    }, $messages)));
+    $error_message = !empty($messages)
+      ? implode(" ", $messages)
+      : "DPD odmietlo vytvorenie zásielky.";
+
+    return dpd_normalized_response(false, $error_message, $http_code, 422, (string) $response, $reference);
+  }
+
+  return dpd_normalized_response(true, "Zásielka bola úspešne odoslaná do DPD.", $http_code, 200, (string) $response, $reference);
 }

@@ -47,6 +47,8 @@ if ($admin["login"]) {
 }
 
 if ($login == $admin["login"] AND $hesloP == $admin["password"] AND $login AND $heslo) {
+  $ADMIN_DATA = $admin;
+
   setcookie ("loginADMIN", "$login", time() + 60*60*24, "/");
 
   $unique_code = unique_code_admin_login( $admin["login"], $_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"], session_id() );
@@ -68,6 +70,8 @@ if ($login == $admin["login"] AND $hesloP == $admin["password"] AND $login AND $
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+require_once __DIR__ . "/config/controls_log.php";
 
 $meta["title_primary"] = "EXPEDÍCIA";
 $meta["h1"] = "";
@@ -145,6 +149,30 @@ if ($page === "invoice") {
   if (!$order) {
     http_response_code(404);
     exit("Objednávka nebola nájdená.");
+  }
+
+  $admin_data = controls_get_admin_data($db);
+  $control_user_id = (int) ($admin_data["id"] ?? 0);
+
+  if ($control_user_id > 0) {
+    $query = $db->prepare("
+      UPDATE orders
+      SET
+        {$status_column} = CASE
+          WHEN {$status_column} = 'nove' THEN 'v_procese'
+          ELSE {$status_column}
+        END,
+        {$user_column} = :user_id
+      WHERE id = :id
+    ");
+    $query->execute([":user_id" => $control_user_id, ":id" => $order_id]);
+
+    controls_add_log($db, $order_id, $control_user_id, $typ_kontroly, "invoice_opened", "opened", [
+      "message" => "Otvorený detail objednávky."
+    ]);
+
+    $order[$status_column] = $order[$status_column] === "nove" ? "v_procese" : $order[$status_column];
+    $order[$user_column] = $control_user_id;
   }
 
   $query = $db->prepare("

@@ -2,8 +2,8 @@
 $DOPRAVA_KODY = [
   "SHIPPING4" => ["name" => "Osobný odber", "api" => "", "class" => "shipping4"],
   "SHIPPING62" => ["name" => "Packeta Zásielkovňa", "api" => "packeta_zasielkovna", "class" => "shipping62"],
-  "SHIPPING65" => ["name" => "DPD – odberné miesto", "api" => "dpd_odberne_miesto", "carrier" => "dpd", "product" => 17, "class" => "shipping65"],
-  "SHIPPING68" => ["name" => "DPD – doručenie na adresu", "api" => "dpd_dorucenie_na_adresu", "carrier" => "dpd", "product" => 9, "class" => "shipping68"]
+  "SHIPPING65" => ["name" => "DPD - odberné miesto", "api" => "dpd_odberne_miesto", "carrier" => "dpd", "product" => 17, "class" => "shipping65"],
+  "SHIPPING68" => ["name" => "DPD - doručenie na adresu", "api" => "dpd_dorucenie_na_adresu", "carrier" => "dpd", "product" => 9, "class" => "shipping68"]
 ];
 define("DOPRAVA_KODY", $DOPRAVA_KODY);
 
