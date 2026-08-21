@@ -339,16 +339,16 @@ a {
   display: block; font-size: 16px; color: #38785b;
 }
 .shipment-form {
-  display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 960px; margin: 0 auto; padding: 28px; text-align: left; color: #172033; background: #fff; border: 1px solid #b9e2ca;
+  display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0; text-align: left; color: #172033; background: transparent; border: 0;
 }
 .shipment-form_body {
-  display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 28px; width: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 20px; width: 100%;
 }
 .shipment-form_left {
-  min-width: 0;
+  min-width: 0; padding: 30px; background: #fff; border: 1px solid #b9e2ca;
 }
 .shipment-form_right {
-  position: sticky; top: 90px;
+  position: sticky; top: 90px; padding: 20px; background: #fff; border: 1px solid #b9e2ca; box-shadow: 0 5px 14px rgba(23, 32, 51, .08);
 }
 .shipment-form_header {
   width: 100%; margin: 0 0 20px;
@@ -369,7 +369,7 @@ a {
   font-size: 15px; font-weight: 700; color: #273044;
 }
 .shipment-weight {
-  width: 100%; height: 64px; padding: 0 16px; text-align: right; font-family: "Inter", sans-serif; font-size: 28px; line-height: 1; font-weight: 700; color: #172033; background: #f3f6fa; border: 2px solid #d7dfe9; border-radius: 0; outline: 0;
+  width: 100%; height: 68px; padding: 0 16px; text-align: right; font-family: "Inter", sans-serif; font-size: 30px; line-height: 1; font-weight: 700; color: #172033; background: #f3f6fa; border: 2px solid #d7dfe9; border-radius: 0; outline: 0;
 }
 .shipment-weight.is-active {
   background: #fff; border-color: #246bfe; box-shadow: 0 0 0 3px rgba(36, 107, 254, .15);
@@ -378,7 +378,7 @@ a {
   font-size: 18px; font-weight: 700; color: #657084;
 }
 .shipment-parcel_remove {
-  display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 64px; font-size: 30px; line-height: 1; color: #b42318; background: #fff0ee; border: 0; border-radius: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 68px; font-size: 30px; line-height: 1; color: #b42318; background: #fff0ee; border: 0; border-radius: 0; cursor: pointer;
 }
 .shipment-add-parcel {
   display: inline-flex; align-self: flex-start; align-items: center; justify-content: center; min-height: 48px; margin: 16px 0 0; padding: 0 16px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; color: #174f96; background: #deebff; border: 0; border-radius: 0; cursor: pointer;
@@ -387,7 +387,7 @@ a {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0;
 }
 .shipment-keypad button {
-  height: 64px; font-family: "Inter", sans-serif; font-size: 24px; font-weight: 700; color: #172033; background: #e9edf2; border: 0; border-radius: 0; cursor: pointer;
+  height: 82px; font-family: "Inter", sans-serif; font-size: 30px; font-weight: 800; color: #172033; background: #e9edf2; border: 0; border-radius: 0; cursor: pointer;
 }
 .shipment-keypad button:active {
   color: #fff; background: #246bfe;

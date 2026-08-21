@@ -195,7 +195,10 @@ if (empty($page)) { //form
           $("#invoice-items-box").attr("hidden", "hidden");
           $("#invoice-control-success").removeAttr("hidden");
           $(".footbar").attr("hidden", "hidden");
-          $(".shipment-weight").first().trigger("click");
+
+          setTimeout(function() {
+            $(".shipment-weight").first().trigger("focus");
+          }, 0);
         }
       }
 
@@ -317,8 +320,13 @@ if (empty($page)) { //form
         $activeWeight.addClass("is-active");
       }
 
-      $parcels.on("click", ".shipment-weight", function() {
+      $parcels.on("focus click", ".shipment-weight", function() {
         selectWeight($(this));
+      });
+
+      $parcels.on("input", ".shipment-weight", function() {
+        selectWeight($(this));
+        updateShipmentSubmit();
       });
 
       $("#shipment-add-parcel").on("click", function() {
@@ -327,7 +335,7 @@ if (empty($page)) { //form
         $newParcel.find(".shipment-weight").val("");
         $parcels.append($newParcel);
         updateParcelLabels();
-        selectWeight($newParcel.find(".shipment-weight"));
+        $newParcel.find(".shipment-weight").trigger("focus");
       });
 
       $parcels.on("click", ".shipment-parcel_remove", function() {
@@ -364,7 +372,7 @@ if (empty($page)) { //form
           value += key;
         }
 
-        $activeWeight.val(value);
+        $activeWeight.val(value).trigger("focus");
         updateShipmentSubmit();
       });
 

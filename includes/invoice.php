@@ -160,7 +160,7 @@ function getShoptetProductImageUrl($code, $token) {
 
 <div class="invoice-control-success" id="invoice-control-success" hidden>
   <?php if (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
-    <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>">
+    <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" nofocus>
       <div class="shipment-form_body">
         <div class="shipment-form_left">
           <div class="shipment-form_header">
@@ -170,19 +170,19 @@ function getShoptetProductImageUrl($code, $token) {
           <div class="shipment-parcels" id="shipment-parcels">
             <div class="shipment-parcel">
               <span class="shipment-parcel_label">Balík 1</span>
-              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" value="">
               <span class="shipment-parcel_unit">kg</span>
               <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
             </div>
             <div class="shipment-parcel">
               <span class="shipment-parcel_label">Balík 2</span>
-              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" value="">
               <span class="shipment-parcel_unit">kg</span>
               <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
             </div>
             <div class="shipment-parcel">
               <span class="shipment-parcel_label">Balík 3</span>
-              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" value="">
               <span class="shipment-parcel_unit">kg</span>
               <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
             </div>
