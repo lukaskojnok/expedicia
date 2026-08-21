@@ -1,4 +1,74 @@
 <?php
+//////////////// LOGIN admin
+function unique_code_admin_login( $login, $ip, $user_agent, $session_id ) {
+  //return hash('sha512', $login . $ip . $user_agent . $session_id );
+  return hash('sha512', $login . $ip . $user_agent);
+}
+
+if ( !empty($_COOKIE["loginADMIN"]) ) {
+  $login = htmlspecialchars($_COOKIE["loginADMIN"]);
+  $unique_code = htmlspecialchars($_COOKIE["loginADMIN_unique_code"]);
+
+  $query = $GLOBALS["db"]->prepare( "SELECT * FROM admins_logs WHERE unique_code=:unique_code" );
+  $query->execute( ["unique_code" => $unique_code] );
+  $uq_control = $query->rowCount() ? $query->fetch( PDO::FETCH_ASSOC ) : [];
+
+  $uq_control_code = unique_code_admin_login( $uq_control["login"], $uq_control["ip"], $uq_control["user_agent"], $uq_control["session_id"] );
+
+  if ( $uq_control["unique_code"] == $uq_control_code ) {
+    $GLOBALS["db"]->prepare( "UPDATE admins_logs SET date_last_do=NOW() WHERE unique_code=:unique_code" )->execute( ["unique_code" => $uq_control_code] );
+
+    $query = $GLOBALS["db"]->prepare( "SELECT id, login, email, name, permissions FROM admins WHERE login=:login" );
+    $query->execute( ["login" => $login] );
+    $ADMIN_DATA = $query->rowCount() ? $query->fetch( PDO::FETCH_ASSOC ) : [];
+  } else {
+    $query = $GLOBALS["db"]->prepare( "DELETE FROM admins_logs WHERE unique_code=:unique_code" )->execute( [ "unique_code" => $_COOKIE["loginADMIN_unique_code"] ] );
+
+    setcookie("loginADMIN", "", time(), "/");
+    setcookie("loginADMIN_unique_code", "", time(), "/");
+    header("Location:?");
+    exit;
+  }
+}
+//////////////// LOGIN admin
+
+$login = (string) trim("lukaskojnok");
+$heslo = (string) trim("Heslo10");
+
+// echo hash('sha512', $login.$heslo.HAS_ADMIN);
+
+$query = $GLOBALS["db"]->prepare( "SELECT * FROM admins WHERE login=:login AND active='1'" );
+$query->execute( ["login" => $login] );
+$admin = $query->rowCount() ? $query->fetch( PDO::FETCH_ASSOC ) : [];
+
+$hesloP = "";
+if ($admin["login"]) {
+  $hesloP = hash('sha512', $admin["login"].$heslo.HAS_ADMIN);
+}
+
+if ($login == $admin["login"] AND $hesloP == $admin["password"] AND $login AND $heslo) {
+  setcookie ("loginADMIN", "$login", time() + 60*60*24, "/");
+
+  $unique_code = unique_code_admin_login( $admin["login"], $_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"], session_id() );
+  setcookie ("loginADMIN_unique_code", "$unique_code", time() + 60*60*24, "/");
+
+  $GLOBALS["db"]->prepare( "UPDATE admins SET date_login_last=NOW() WHERE login=:login" )->execute( ["login" => $login] );
+
+  $GLOBALS["db"]->prepare( "DELETE FROM admins_logs WHERE unique_code=:unique_code" )->execute( ["unique_code" => $unique_code] );
+
+  $query = $GLOBALS["db"]->prepare( "INSERT INTO admins_logs SET login=:login, session_id=:session_id, user_agent=:user_agent, ip=:ip, unique_code=:unique_code, date_login=NOW(), date_last_do=NOW()" );
+  $query->execute([
+    "login" => $login,
+    "session_id" => session_id(),
+    "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+    "ip" => $_SERVER["REMOTE_ADDR"],
+    "unique_code" => $unique_code
+  ]);
+}  
+
+
+///////////////////////////////////////////////////////////////////////////
+
 $meta["title_primary"] = "EXPEDÍCIA";
 $meta["h1"] = "";
 $meta["title"] = "";
@@ -46,7 +116,7 @@ if ($typ_kontroly === "vyskladnenie") {
   $status_title = "Stav expedície";
 }
 
-$prihlaseny_meno = $_SESSION["admin_name"] ?? "Lukáš";
+$prihlaseny_meno = $ADMIN_DATA["name"] ?? "neprihlásený";
 $topbar_count_value = "";
 $topbar_count_label = "";
 $topbar_back_url = "";

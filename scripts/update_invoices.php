@@ -243,6 +243,7 @@ try {
 
       ":cislo_balika" => xml_nullable($order->PACKAGE_NUMBER),
       ":vaha_kg" => xml_decimal($order->WEIGHT, 3),
+      ":parcelShopId" => $foxdeli !== null ? xml_nullable($foxdeli->PICK_UP_PLACE) : null,
 
       ":foxdeli_shipping_code" => $foxdeli !== null ? xml_nullable($foxdeli->SHIPPING_CODE) : null,
       ":foxdeli_shipping_type" => $foxdeli !== null ? xml_nullable($foxdeli->SHIPPING_TYPE) : null,
@@ -311,6 +312,7 @@ try {
 
           cislo_balika = :cislo_balika,
           vaha_kg = :vaha_kg,
+          parcelShopId = :parcelShopId,
 
           foxdeli_shipping_code = :foxdeli_shipping_code,
           foxdeli_shipping_type = :foxdeli_shipping_type,
@@ -385,6 +387,7 @@ try {
 
           cislo_balika = :cislo_balika,
           vaha_kg = :vaha_kg,
+          parcelShopId = :parcelShopId,
 
           foxdeli_shipping_code = :foxdeli_shipping_code,
           foxdeli_shipping_type = :foxdeli_shipping_type,
