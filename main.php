@@ -194,6 +194,8 @@ if (empty($page)) { //form
         if (!hasRemainingItems) {
           $("#invoice-items-box").attr("hidden", "hidden");
           $("#invoice-control-success").removeAttr("hidden");
+          $(".footbar").attr("hidden", "hidden");
+          $(".shipment-weight").first().trigger("click");
         }
       }
 
@@ -271,6 +273,137 @@ if (empty($page)) { //form
         $barcodeInput.val(code);
         $("#barcode-form-item").trigger("submit");
       });
+
+      const $shipmentForm = $("#shipment-form");
+
+      if (!$shipmentForm.length) {
+        return;
+      }
+
+      const $parcels = $("#shipment-parcels");
+      const $shipmentSubmit = $("#shipment-submit");
+      const $shipmentMessage = $("#shipment-message");
+      let $activeWeight = $parcels.find(".shipment-weight").first();
+
+      function updateParcelLabels() {
+        $parcels.find(".shipment-parcel").each(function(index) {
+          $(this).find(".shipment-parcel_label").text("Balík " + (index + 1));
+        });
+
+        $(".shipment-parcel_remove").toggle($parcels.find(".shipment-parcel").length > 1);
+      }
+
+      function getShipmentWeights() {
+        const weights = [];
+
+        $parcels.find(".shipment-weight").each(function() {
+          const weight = parseFloat(String($(this).val()).replace(",", "."));
+
+          if (weight > 0) {
+            weights.push(weight);
+          }
+        });
+
+        return weights;
+      }
+
+      function updateShipmentSubmit() {
+        $shipmentSubmit.prop("disabled", getShipmentWeights().length === 0);
+      }
+
+      function selectWeight($input) {
+        $activeWeight = $input;
+        $(".shipment-weight").removeClass("is-active");
+        $activeWeight.addClass("is-active");
+      }
+
+      $parcels.on("click", ".shipment-weight", function() {
+        selectWeight($(this));
+      });
+
+      $("#shipment-add-parcel").on("click", function() {
+        const $newParcel = $parcels.find(".shipment-parcel").first().clone();
+
+        $newParcel.find(".shipment-weight").val("");
+        $parcels.append($newParcel);
+        updateParcelLabels();
+        selectWeight($newParcel.find(".shipment-weight"));
+      });
+
+      $parcels.on("click", ".shipment-parcel_remove", function() {
+        const $parcel = $(this).closest(".shipment-parcel");
+        const wasActive = $parcel.find(".shipment-weight").is($activeWeight);
+
+        if ($parcels.find(".shipment-parcel").length <= 1) {
+          return;
+        }
+
+        $parcel.remove();
+        updateParcelLabels();
+
+        if (wasActive) {
+          selectWeight($parcels.find(".shipment-weight").last());
+        }
+
+        updateShipmentSubmit();
+      });
+
+      $("#shipment-keypad").on("click", "button", function() {
+        const key = String($(this).data("key"));
+        let value = String($activeWeight.val() || "");
+
+        if (key === "delete") {
+          value = value.slice(0, -1);
+        } else if (key === ",") {
+          if (value.indexOf(",") !== -1) {
+            return;
+          }
+
+          value += value === "" ? "0," : ",";
+        } else if (value.length < 6) {
+          value += key;
+        }
+
+        $activeWeight.val(value);
+        updateShipmentSubmit();
+      });
+
+      $shipmentForm.on("submit", function(event) {
+        event.preventDefault();
+
+        const weights = getShipmentWeights();
+
+        if (!weights.length) {
+          return;
+        }
+
+        $shipmentSubmit.prop("disabled", true).text("Odosielam…");
+        $shipmentMessage.removeClass("is-error is-success").text("");
+
+        $.ajax({
+          url: "/scripts/send_data.php",
+          method: "POST",
+          dataType: "json",
+          data: { order_id: $shipmentForm.data("order-id"), weights: weights }
+        }).done(function(response) {
+          if (response.success) {
+            $shipmentMessage.addClass("is-success").text(response.message || "Zásielka bola odoslaná dopravcovi.");
+            $shipmentSubmit.text("Odoslané dopravcovi");
+            return;
+          }
+
+          $shipmentMessage.addClass("is-error").text(response.message || "Zásielku sa nepodarilo odoslať.");
+          $shipmentSubmit.prop("disabled", false).text("Poslať dopravcovi");
+        }).fail(function(xhr) {
+          const response = xhr.responseJSON || {};
+          $shipmentMessage.addClass("is-error").text(response.message || "Nastala chyba pri komunikácii so serverom.");
+          $shipmentSubmit.prop("disabled", false).text("Poslať dopravcovi");
+        });
+      });
+
+      updateParcelLabels();
+      selectWeight($activeWeight);
+      updateShipmentSubmit();
     });
     </script>
 

@@ -77,7 +77,67 @@ a {
   width: 170px; text-align: right;
 }
 .data-table_shipping {
-  width: 30%; min-width: 260px; max-width: 420px;
+  width: 30%; min-width: 260px; max-width: 420px; border-left: 6px solid #a9b2c0 !important;
+}
+.data-table td.data-table_shipping {
+  background: #f3f5f8;
+}
+.data-table tbody tr:hover td.data-table_shipping {
+  background: #edf0f4;
+}
+.data-table_shipping .table-main-text {
+  font-size: 15px; color: #172033;
+}
+.data-table_shipping.shipping4, .invoice-summary_shipping.shipping4 {
+  border-left-color: #e5a800 !important;
+}
+.data-table td.data-table_shipping.shipping4 {
+  background: #fff6d8;
+}
+.data-table tbody tr:hover td.data-table_shipping.shipping4 {
+  background: #ffefb8;
+}
+.data-table_shipping.shipping4 .table-main-text, .invoice-summary_shipping.shipping4 strong {
+  color: #6d4e00;
+}
+.data-table_shipping.shipping62, .invoice-summary_shipping.shipping62 {
+  border-left-color: #e91e63 !important;
+}
+.data-table td.data-table_shipping.shipping62 {
+  background: #ffe8f0;
+}
+.data-table tbody tr:hover td.data-table_shipping.shipping62 {
+  background: #ffd8e7;
+}
+.data-table_shipping.shipping62 .table-main-text, .invoice-summary_shipping.shipping62 strong {
+  color: #9e124a;
+}
+.data-table_shipping.shipping65, .invoice-summary_shipping.shipping65 {
+  border-left-color: #3c6fbd !important;
+}
+.data-table td.data-table_shipping.shipping65 {
+  background: #e8f0ff;
+}
+.data-table tbody tr:hover td.data-table_shipping.shipping65 {
+  background: #d9e6ff;
+}
+.data-table_shipping.shipping65 .table-main-text, .invoice-summary_shipping.shipping65 strong {
+  color: #174f96;
+}
+.data-table_shipping.shipping68, .invoice-summary_shipping.shipping68 {
+  border-left-color: #d9252a !important;
+}
+.data-table td.data-table_shipping.shipping68 {
+  background: #ffeded;
+}
+.data-table tbody tr:hover td.data-table_shipping.shipping68 {
+  background: #ffdddd;
+}
+.data-table_shipping.shipping68 .table-main-text, .invoice-summary_shipping.shipping68 strong {
+  color: #a3181c;
+}
+.data-table_shipping.shipping-unknown, .invoice-summary_shipping.shipping-unknown {
+  border-left-color: #7a8494 !important;
 }
 .data-table_empty {
   height: 120px !important; text-align: center; font-size: 15px; color: #7a8494;
@@ -173,16 +233,28 @@ a {
   min-width: 210px;
 }
 .invoice-summary_shipping {
-  padding-left: 22px; color: #123d2a; background: #dff3e8; border-left: 6px solid #24a467;
+  padding-left: 22px; color: #172033; background: #f3f5f8; border-left: 6px solid #a9b2c0;
 }
 .invoice-summary_shipping span {
-  color: #3c765a;
+  color: #657084;
 }
 .invoice-summary_shipping strong {
-  white-space: normal; color: #123d2a;
+  white-space: normal; color: #172033;
 }
 .invoice-summary_shipping small {
-  color: #518068;
+  color: #657084;
+}
+.invoice-summary_shipping.shipping4 {
+  background: #fff6d8;
+}
+.invoice-summary_shipping.shipping62 {
+  background: #ffe8f0;
+}
+.invoice-summary_shipping.shipping65 {
+  background: #e8f0ff;
+}
+.invoice-summary_shipping.shipping68 {
+  background: #ffeded;
 }
 .invoice-items-table .invoice-item_name {
   width: 45%;
@@ -255,7 +327,7 @@ a {
   font-size: 18px; color: rgba(255, 255, 255, .8);
 }
 .invoice-control-success {
-  width: 100%; padding: 55px 30px; text-align: center; color: #146c43; background: #e4f7ed; border: 2px solid #22a96b;
+  width: 100%; padding: 30px; text-align: center; color: #146c43; background: #e4f7ed; border: 2px solid #22a96b;
 }
 .invoice-control-success[hidden] {
   display: none;
@@ -265,6 +337,92 @@ a {
 }
 .invoice-control-success span {
   display: block; font-size: 16px; color: #38785b;
+}
+.shipment-form {
+  display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 960px; margin: 0 auto; padding: 28px; text-align: left; color: #172033; background: #fff; border: 1px solid #b9e2ca;
+}
+.shipment-form_body {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 28px; width: 100%;
+}
+.shipment-form_left {
+  min-width: 0;
+}
+.shipment-form_right {
+  position: sticky; top: 90px;
+}
+.shipment-form_header {
+  width: 100%; margin: 0 0 20px;
+}
+.shipment-form_header strong {
+  display: block; margin: 0 0 4px; font-size: 20px; line-height: 1.2; color: #172033;
+}
+.shipment-form_header span {
+  font-size: 14px; color: #657084;
+}
+.shipment-parcels {
+  display: flex; flex-direction: column; gap: 10px; width: 100%;
+}
+.shipment-parcel {
+  display: grid; grid-template-columns: 100px minmax(0, 1fr) 42px 54px; align-items: center; gap: 8px; width: 100%;
+}
+.shipment-parcel_label {
+  font-size: 15px; font-weight: 700; color: #273044;
+}
+.shipment-weight {
+  width: 100%; height: 64px; padding: 0 16px; text-align: right; font-family: "Inter", sans-serif; font-size: 28px; line-height: 1; font-weight: 700; color: #172033; background: #f3f6fa; border: 2px solid #d7dfe9; border-radius: 0; outline: 0;
+}
+.shipment-weight.is-active {
+  background: #fff; border-color: #246bfe; box-shadow: 0 0 0 3px rgba(36, 107, 254, .15);
+}
+.shipment-parcel_unit {
+  font-size: 18px; font-weight: 700; color: #657084;
+}
+.shipment-parcel_remove {
+  display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 64px; font-size: 30px; line-height: 1; color: #b42318; background: #fff0ee; border: 0; border-radius: 0; cursor: pointer;
+}
+.shipment-add-parcel {
+  display: inline-flex; align-self: flex-start; align-items: center; justify-content: center; min-height: 48px; margin: 16px 0 0; padding: 0 16px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; color: #174f96; background: #deebff; border: 0; border-radius: 0; cursor: pointer;
+}
+.shipment-keypad {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0;
+}
+.shipment-keypad button {
+  height: 64px; font-family: "Inter", sans-serif; font-size: 24px; font-weight: 700; color: #172033; background: #e9edf2; border: 0; border-radius: 0; cursor: pointer;
+}
+.shipment-keypad button:active {
+  color: #fff; background: #246bfe;
+}
+.shipment-keypad .shipment-keypad_delete {
+  color: #b42318; background: #fff0ee;
+}
+.shipment-submit {
+  display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 68px; margin: 16px 0 0; padding: 0 24px; font-family: "Inter", sans-serif; font-size: 17px; font-weight: 800; color: #fff; background: #246bfe; border: 0; border-radius: 0; cursor: pointer;
+}
+.shipment-submit:disabled {
+  color: #8d98a8; background: #dce1e8; cursor: not-allowed;
+}
+.shipment-message {
+  width: 100%; margin: 14px 0 0; font-size: 14px; font-weight: 600; text-align: center;
+}
+.shipment-message.is-error {
+  color: #b42318;
+}
+.shipment-message.is-success {
+  color: #146c43;
+}
+.shipment-not-available {
+  margin: 28px 0 0; font-size: 15px; font-weight: 600; color: #8a3b00;
+}
+@media (max-width: 760px) {
+  .shipment-form_body {
+    grid-template-columns: 1fr;
+  }
+  .shipment-form_right {
+    position: static;
+  }
+  .shipment-keypad {
+    margin: 0;
+  }
 }
 
 .footbar {

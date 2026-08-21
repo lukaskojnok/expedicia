@@ -116,7 +116,7 @@ if ($typ_kontroly === "vyskladnenie") {
   $status_title = "Stav expedície";
 }
 
-$prihlaseny_meno = $ADMIN_DATA["name"] ?? "neprihlásený";
+$prihlaseny_meno = $_SESSION["admin_name"] ?? "Lukáš";
 $topbar_count_value = "";
 $topbar_count_label = "";
 $topbar_back_url = "";
@@ -176,7 +176,9 @@ if ($page === "invoice") {
 
   $zakaznik_meno = $order["fakturacne_meno"] ?: $order["dodacie_meno"] ?: "—";
   $zakaznik_mesto = $order["dodacie_mesto"] ?: $order["fakturacne_mesto"] ?: "—";
-  $doprava_nazov = $order["doprava_nazov"] ?: "Neuvedená doprava";
+  $shipping_data = DOPRAVA_KODY[$order["doprava_kod"]] ?? null;
+  $shipping_class = $shipping_data["class"] ?? "shipping-unknown";
+  $doprava_nazov = ($shipping_data["name"] ?? "") ?: ($order["doprava_nazov"] ?: "Neuvedená doprava");
   $mena = $order["mena"] ?: "EUR";
   $suma_objednavky = number_format((float) $order["cena_na_uhradu"], 2, ",", " ");
   $datum = "—";

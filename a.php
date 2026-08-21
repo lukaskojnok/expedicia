@@ -3,7 +3,7 @@ include("config/common.php");
 
 header("Content-Type: text/plain; charset=utf-8");
 
-
+exit;
 
 /*
  * =========================================================

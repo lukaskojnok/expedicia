@@ -70,7 +70,7 @@ function getShoptetProductImageUrl($code, $token) {
     <strong><span class="status <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"><?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?></span></strong>
   </div>
 
-  <div class="invoice-summary_item invoice-summary_shipping">
+  <div class="invoice-summary_item invoice-summary_shipping <?= htmlspecialchars($shipping_class, ENT_QUOTES, "UTF-8") ?>">
     <span>Spôsob doručenia</span>
     <strong><?= htmlspecialchars($doprava_nazov, ENT_QUOTES, "UTF-8") ?></strong>
 
@@ -159,7 +159,49 @@ function getShoptetProductImageUrl($code, $token) {
 </div>
 
 <div class="invoice-control-success" id="invoice-control-success" hidden>
-  <strong>Kontrola bola úspešná</strong>
-  <span>Všetky produkty z objednávky boli skontrolované.</span>
+  <?php if (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
+    <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>">
+      <div class="shipment-form_body">
+        <div class="shipment-form_left">
+          <div class="shipment-form_header">
+            <strong>Hmotnosť balíkov</strong>
+            <span>Hmotnosť zadávaj v kilogramoch.</span>
+          </div>
+          <div class="shipment-parcels" id="shipment-parcels">
+            <div class="shipment-parcel">
+              <span class="shipment-parcel_label">Balík 1</span>
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <span class="shipment-parcel_unit">kg</span>
+              <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
+            </div>
+            <div class="shipment-parcel">
+              <span class="shipment-parcel_label">Balík 2</span>
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <span class="shipment-parcel_unit">kg</span>
+              <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
+            </div>
+            <div class="shipment-parcel">
+              <span class="shipment-parcel_label">Balík 3</span>
+              <input class="shipment-weight" type="text" inputmode="decimal" autocomplete="off" readonly value="">
+              <span class="shipment-parcel_unit">kg</span>
+              <button type="button" class="shipment-parcel_remove" aria-label="Odstrániť balík">×</button>
+            </div>
+          </div>
+          <button type="button" class="shipment-add-parcel" id="shipment-add-parcel">+ Ďalší balík</button>
+          <button type="submit" class="shipment-submit" id="shipment-submit" disabled>Poslať dopravcovi</button>
+        </div>
+        <div class="shipment-form_right">
+          <div class="shipment-keypad" id="shipment-keypad" aria-label="Numerická klávesnica">
+            <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+            <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+            <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+            <button type="button" data-key=",">,</button><button type="button" data-key="0">0</button><button type="button" class="shipment-keypad_delete" data-key="delete">⌫</button>
+          </div>
+        </div>
+      </div>
+      <div class="shipment-message" id="shipment-message" aria-live="polite"></div>
+    </form>
+  <?php } else { ?>
+    <div class="shipment-not-available">Pre tento druh dopravy nie je zatiaľ nastavené odosielanie dopravcovi.</div>
+  <?php } ?>
 </div>
-

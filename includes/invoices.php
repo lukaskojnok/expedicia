@@ -74,7 +74,9 @@
           $zakaznik_meno = $result["fakturacne_meno"] ?: $result["dodacie_meno"] ?: "—";
           $zakaznik_mesto = $result["dodacie_mesto"] ?: $result["fakturacne_mesto"] ?: "—";
 
-          $doprava_nazov = $result["doprava_nazov"] ?: "Neuvedená doprava";
+          $shipping_data = DOPRAVA_KODY[$result["doprava_kod"]] ?? null;
+          $shipping_class = $shipping_data["class"] ?? "shipping-unknown";
+          $doprava_nazov = ($shipping_data["name"] ?? "") ?: ($result["doprava_nazov"] ?: "Neuvedená doprava");
           $foxdeli_pick_up_place = $result["foxdeli_pick_up_place"];
 
           $suma_objednavky = number_format(
@@ -133,7 +135,7 @@
               </div>
             </td>
 
-            <td class="data-table_shipping">
+            <td class="data-table_shipping <?= htmlspecialchars($shipping_class, ENT_QUOTES, "UTF-8") ?>">
               <div class="table-main-text">
                 <?= htmlspecialchars($doprava_nazov, ENT_QUOTES, "UTF-8") ?>
               </div>
