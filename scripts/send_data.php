@@ -41,6 +41,13 @@ function shipment_label_extension($mime_type, $fallback = "pdf") {
   return $extensions[strtolower(trim((string) $mime_type))] ?? $fallback;
 }
 
+function shipment_order_is_cod($order) {
+  $payment_code = strtoupper(trim((string) ($order["platba_kod"] ?? "")));
+  $payment_name = strtolower(trim((string) ($order["platba_nazov"] ?? "")));
+
+  return $payment_code === "BILLING3" || strpos($payment_name, "dobier") !== false;
+}
+
 function shipment_download_label($url) {
   $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
 
@@ -220,6 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $order_id = (int) ($_POST["order_id"] ?? 0);
 $typ_kontroly = $_POST["typ_kontroly"] ?? "expedicia";
 $weights_input = $_POST["weights"] ?? [];
+$cod_amount_input = (float) str_replace(",", ".", (string) ($_POST["cod_amount"] ?? "0"));
 $print_label = filter_var($_POST["print_label"] ?? false, FILTER_VALIDATE_BOOLEAN);
 $weights = [];
 
@@ -254,6 +262,13 @@ if (!$order) {
   send_data_response(false, "Objednávka nebola nájdená.", 404);
 }
 
+$is_cod = shipment_order_is_cod($order);
+$cod_amount = $is_cod ? round($cod_amount_input, 2) : 0;
+
+if ($is_cod && $cod_amount <= 0) {
+  send_data_response(false, "Pri dobierke musí byť suma vyššia ako 0.", 422);
+}
+
 if (($order["status_odoslanie_dopravcovi"] ?? "") === "success") {
   send_data_response(false, "Táto objednávka už bola odoslaná dopravcovi.", 409);
 }
@@ -271,7 +286,13 @@ if (!is_file($api_file)) {
   send_data_response(false, "API modul pre túto dopravu ešte nie je vytvorený.", 501);
 }
 
-$shipment_data = ["order" => $order, "shipping" => $shipping, "weights" => $weights];
+$shipment_data = [
+  "order" => $order,
+  "shipping" => $shipping,
+  "weights" => $weights,
+  "is_cod" => $is_cod,
+  "cod_amount" => $cod_amount
+];
 
 try {
   require $api_file;

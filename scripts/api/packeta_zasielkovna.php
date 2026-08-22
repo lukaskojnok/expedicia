@@ -195,6 +195,8 @@ function packeta_send_shipment($shipment_data) {
   $order = $shipment_data["order"];
   $shipping = $shipment_data["shipping"];
   $weights = $shipment_data["weights"];
+  $is_cod = !empty($shipment_data["is_cod"]);
+  $cod_amount = $is_cod ? round((float) ($shipment_data["cod_amount"] ?? 0), 2) : 0;
   $api_password = packeta_api_password();
   $reference = trim((string) ($order["cislo_objednavky"] ?: $order["id"]));
   if ($api_password === "") {
@@ -230,7 +232,6 @@ function packeta_send_shipment($shipment_data) {
     return packeta_normalized_response(false, "Objednávka nemá úplnú dodaciu adresu.", 0, 422, "", $reference);
   }
   $order_value = round((float) ($order["cena_na_uhradu"] ?? 0), 2);
-  $cod = packeta_is_cod($order) ? $order_value : 0;
   $eshop = packeta_first_value($shipping, ["eshop", "sender"]);
   if ($eshop === "") {
     $eshop = $currency === "CZK" ? "okfish.cz" : "okfish.sk";
@@ -240,6 +241,7 @@ function packeta_send_shipment($shipment_data) {
   $last_http_code = 0;
   foreach ($weights as $index => $weight) {
     $packet_reference = count($weights) > 1 ? $reference . "-" . ($index + 1) : $reference;
+    $packet_cod = $is_cod && $index === 0 ? $cod_amount : 0;
     $attributes = [
       "number" => $packet_reference,
       "name" => $recipient_name,
@@ -247,7 +249,7 @@ function packeta_send_shipment($shipment_data) {
       "phone" => $phone,
       "email" => $email,
       "addressId" => $address_id,
-      "cod" => number_format($cod, 2, ".", ""),
+      "cod" => number_format($packet_cod, 2, ".", ""),
       "value" => number_format($order_value, 2, ".", ""),
       "weight" => number_format((float) $weight, 3, ".", ""),
       "eshop" => $eshop,

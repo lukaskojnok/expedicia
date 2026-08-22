@@ -11,6 +11,10 @@ require_once("header_s.php");
 
 require_once("header_html.php");
 
-include("main.php");
+if ($is_page_login) {
+  include("login.php");
+} else {
+  include("main.php");
+}
 
 require_once("header_footer.php");

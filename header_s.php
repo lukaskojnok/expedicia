@@ -6,11 +6,13 @@ if (isset($_GET["logout"]) AND $_GET["logout"] == 1) {
   setcookie("loginADMIN_unique_code", "", time(), "/");
   header("Location: login.php");
   exit;
+  $is_page_login = true;
 }
 
 if (!isset($_COOKIE["loginADMIN"]) or !isset($_COOKIE["loginADMIN_unique_code"])) {
   header("Location: login.php");
   exit;
+  $is_page_login = true;
 } else {
   setcookie("loginADMIN", "$_COOKIE[loginADMIN]", time() + 60 * 60 * 3, "/");
 }

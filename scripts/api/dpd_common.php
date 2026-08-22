@@ -111,6 +111,8 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
   $order = $shipment_data["order"];
   $shipping = $shipment_data["shipping"];
   $weights = $shipment_data["weights"];
+  $is_cod = !empty($shipment_data["is_cod"]);
+  $cod_amount = $is_cod ? round((float) ($shipment_data["cod_amount"] ?? 0), 2) : 0;
   $product = (int) ($shipping["product"] ?? 0);
   $is_parcelshop_delivery = $product === 17;
   $reference = trim((string) ($order["cislo_objednavky"] ?: $order["id"]));
@@ -121,6 +123,10 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
 
   if ($is_parcelshop_delivery && $parcelshop_id === "") {
     return dpd_normalized_response(false, "Pri DPD odbernom mieste chýba parcelShopId.", 0, 422, "", $reference);
+  }
+
+  if ($is_cod && $cod_amount <= 0) {
+    return dpd_normalized_response(false, "Pri dobierke musí byť suma vyššia ako 0.", 0, 422, "", $reference);
   }
 
   $recipient_name = trim((string) ($order["dodacie_meno"] ?: $order["fakturacne_meno"]));
@@ -180,10 +186,33 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
     "parcels" => ["parcel" => $parcels]
   ];
 
+  $services = [];
+
   if ($is_parcelshop_delivery) {
-    $shipment["services"] = [
-      "parcelShopDelivery" => ["parcelShopId" => $parcelshop_id]
+    $services["parcelShopDelivery"] = ["parcelShopId" => $parcelshop_id];
+  }
+
+  if ($is_cod) {
+    $currency = strtoupper(trim((string) ($order["mena"] ?? "EUR")));
+    $bank_constant = $currency === "CZK"
+      ? "DPD_BANK_ID_SLSP_CZK_1"
+      : "DPD_BANK_ID_SLSP_EUR_1";
+
+    if (!defined($bank_constant)) {
+      return dpd_normalized_response(false, "Pre menu {$currency} chýba DPD bankový účet v konfigurácii.", 0, 500, "", $reference);
+    }
+
+    $services["cod"] = [
+      "amount" => $cod_amount,
+      "currency" => $currency,
+      "bankAccount" => ["id" => (int) constant($bank_constant)],
+      "variableSymbol" => preg_replace('/\D+/', '', $reference),
+      "paymentMethod" => $currency === "CZK" ? 0 : 1
     ];
+  }
+
+  if (!empty($services)) {
+    $shipment["services"] = $services;
   }
 
   $request_data = [
