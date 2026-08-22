@@ -1,4 +1,168 @@
 $(function() {
+  const $menuButton = $(".topbar-hamburger");
+  const $menu = $("#topbar-dropdown-menu");
+
+  if (!$menuButton.length || !$menu.length) {
+    return;
+  }
+
+  $menuButton.on("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const isOpen = !$menu.is("[hidden]");
+
+    if (isOpen) {
+      $menu.attr("hidden", "hidden");
+      $menuButton.attr("aria-expanded", "false");
+    } else {
+      $menu.removeAttr("hidden");
+      $menuButton.attr("aria-expanded", "true");
+    }
+  });
+
+  $menu.on("click", function(event) {
+    event.stopPropagation();
+  });
+
+  $(document).on("click", function() {
+    $menu.attr("hidden", "hidden");
+    $menuButton.attr("aria-expanded", "false");
+  });
+
+  $(document).on("keydown", function(event) {
+    if (event.key === "Escape") {
+      $menu.attr("hidden", "hidden");
+      $menuButton.attr("aria-expanded", "false");
+    }
+  });
+});
+
+$(function() {
+  const $claimData = $("#work-claim-data");
+  const $conflictModal = $("#work-conflict-modal");
+  let claimInProgress = false;
+
+  function closeConflictModal() {
+    $conflictModal.attr("hidden", "hidden").attr("aria-hidden", "true");
+    $("body").removeClass("work-conflict-modal-open");
+  }
+
+  function showConflictModal(workerName) {
+    const controlType = String($claimData.data("control-type") || "");
+    const action = controlType === "vyskladnenie" ? "vyskladňuje" : "expeduje";
+
+    $("#work-conflict-message").text(
+      "Túto objednávku už " + action + " " + workerName + ". Ak budete pokračovať, objednávku prevezmete na svoje meno."
+    );
+    $conflictModal.removeAttr("hidden").attr("aria-hidden", "false");
+    $("body").addClass("work-conflict-modal-open");
+  }
+
+  function claimOrder(force) {
+    if (!$claimData.length || claimInProgress || String($claimData.data("completed")) === "1") {
+      return;
+    }
+
+    claimInProgress = true;
+
+    $.ajax({
+      url: "/scripts/order_claim.php",
+      method: "POST",
+      dataType: "json",
+      data: {
+        order_id: $claimData.data("order-id"),
+        typ_kontroly: $claimData.data("control-type"),
+        csrf_token: $claimData.data("csrf-token"),
+        force: force ? 1 : 0
+      }
+    }).done(function(response) {
+      if (response.success) {
+        closeConflictModal();
+      }
+    }).fail(function(xhr) {
+      const response = xhr.responseJSON || {};
+
+      if (response.conflict) {
+        showConflictModal(response.worker_name || "iný používateľ");
+        return;
+      }
+
+      alert(response.message || "Objednávku sa nepodarilo priradiť používateľovi.");
+    }).always(function() {
+      claimInProgress = false;
+    });
+  }
+
+  $conflictModal.on("click", "[data-work-conflict-takeover], .work-conflict-modal_backdrop", function() {
+    claimOrder(true);
+  });
+
+  claimOrder(false);
+});
+
+$(function() {
+  const $workersTable = $("[data-workers-control-type]");
+
+  if (!$workersTable.length) {
+    return;
+  }
+
+  const controlType = String($workersTable.data("workers-control-type") || "");
+
+  function renderWorker($cell, worker) {
+    $cell.empty();
+
+    if (!worker || !worker.worker_name) {
+      $("<span>", { class: "table-empty", text: "—" }).appendTo($cell);
+      return;
+    }
+
+    const isCompleted = worker.work_status === "ukoncene";
+    const label = controlType === "vyskladnenie"
+      ? (isCompleted ? "Vyskladnil" : "Vyskladňuje")
+      : (isCompleted ? "Expedoval" : "Expeduje");
+    const $worker = $("<span>", {
+      class: "working-user" + (isCompleted ? " working-user_done" : "")
+    });
+
+    $worker.append(document.createTextNode(label + ": "));
+    $("<strong>", { text: worker.worker_name }).appendTo($worker);
+    $worker.appendTo($cell);
+  }
+
+  function refreshWorkers() {
+    $.ajax({
+      url: "/scripts/order_workers.php",
+      method: "GET",
+      dataType: "json",
+      cache: false,
+      data: {
+        typ_kontroly: controlType
+      }
+    }).done(function(response) {
+      if (!response.success) {
+        return;
+      }
+
+      const workers = {};
+
+      $.each(response.workers || [], function(index, worker) {
+        workers[String(worker.id)] = worker;
+      });
+
+      $("[data-order-worker-id]").each(function() {
+        const orderId = String($(this).data("order-worker-id"));
+        renderWorker($(this), workers[orderId]);
+      });
+    });
+  }
+
+  refreshWorkers();
+  window.setInterval(refreshWorkers, 5000);
+});
+
+$(function() {
   $(document).on("dblclick", ".invoice-row", function(event) {
     if ($(event.target).closest("a, button, input, select, textarea").length) {
       return;
@@ -41,6 +205,8 @@ $(function() {
   const $modalBody = $("#order-logs-modal-body");
   const actionLabels = {
     invoice_opened: "Otvorený detail objednávky",
+    work_claimed: "Objednávku začal spracovávať používateľ",
+    work_taken_over: "Objednávku prevzal iný používateľ",
     control_completed: "Kontrola objednávky dokončená",
     carrier_sent: "Odoslanie zásielky dopravcovi"
   };

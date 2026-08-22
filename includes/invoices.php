@@ -3,7 +3,7 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th>Číslo faktúry</th>
+        <!-- <th>Číslo faktúry</th> -->
         <th>Objednávka</th>
         <th>E-shop</th>
         <th>Zákazník</th>
@@ -11,7 +11,8 @@
         <th>Dátum</th>
         <th>Položky</th>
         <th>Suma</th>
-        <th><?= htmlspecialchars($status_title, ENT_QUOTES, "UTF-8") ?></th>
+        <th>Vyskladnenie</th>
+        <th>Expedícia</th>
         <th>Pracuje</th>
         <th></th>
       </tr>
@@ -28,6 +29,8 @@
 
           $status_label = $status_labels[$status] ?? $status;
           $status_class = $status_classes[$status] ?? "status-waiting";
+          $status_vyskladnenie = $result["status_vyskladnenie"] ?? "nove";
+          $status_expedicia = $result["status_expedicia"] ?? "nove";
 
           $row_classes = [];
 
@@ -47,7 +50,7 @@
             $datum_timestamp = strtotime($result["datum_objednavky"]);
 
             if ($datum_timestamp !== false) {
-              $datum = date("d. m. Y, H:i", $datum_timestamp);
+              $datum = date("d.m. H:i", $datum_timestamp);
             }
           }
 
@@ -101,13 +104,13 @@
             data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
           >
 
-            <td>
+            <!-- <td>
               <div class="order-number">
                 <strong nofocus>
                   <?= htmlspecialchars($result["cislo_faktury"] ?: "—", ENT_QUOTES, "UTF-8") ?>
                 </strong>
               </div>
-            </td>
+            </td> -->
 
             <td>
               <strong>
@@ -165,7 +168,7 @@
               <?= htmlspecialchars($datum, ENT_QUOTES, "UTF-8") ?>
             </td>
 
-            <td>
+            <td align="center">
               <?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?>
             </td>
 
@@ -185,13 +188,13 @@
             <td>
               <button
                 type="button"
-                class="status order-logs-open <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"
+                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_vyskladnenie] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
                 data-order-id="<?= (int) $result["id"] ?>"
                 data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
                 title="Zobraziť históriu objednávky"
                 nofocus
               >
-                <?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?>
+                <?= htmlspecialchars($status_labels[$status_vyskladnenie] ?? $status_vyskladnenie, ENT_QUOTES, "UTF-8") ?>
               </button>
 
               <?php if (!empty($result["zmena"])) { ?>
@@ -202,6 +205,19 @@
                   Zmenené
                 </span>
               <?php } ?>
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_expedicia] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
+                data-order-id="<?= (int) $result["id"] ?>"
+                data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
+                title="Zobraziť históriu objednávky"
+                nofocus
+              >
+                <?= htmlspecialchars($status_labels[$status_expedicia] ?? $status_expedicia, ENT_QUOTES, "UTF-8") ?>
+              </button>
             </td>
 
             <td>

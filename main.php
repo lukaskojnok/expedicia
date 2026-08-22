@@ -27,7 +27,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
-          <div class="topbar-dropdown_mode">Aktuálne: <strong><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
+          <div class="topbar-dropdown_mode">Aktuálne: <strong class="black"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
           <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>">
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
@@ -69,6 +69,29 @@
     </div>
   </section>
 </div>
+
+<?php if ($page === "invoice") { ?>
+  <div
+    class="work-claim-data"
+    id="work-claim-data"
+    data-order-id="<?= (int) $order_id ?>"
+    data-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>"
+    data-csrf-token="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+    data-completed="<?= ($order[$status_column] ?? "nove") === "ukoncene" ? "1" : "0" ?>"
+    hidden
+  ></div>
+
+  <div class="work-conflict-modal" id="work-conflict-modal" aria-hidden="true" hidden nofocus>
+    <div class="work-conflict-modal_backdrop"></div>
+    <section class="work-conflict-modal_dialog" role="dialog" aria-modal="true" aria-labelledby="work-conflict-title">
+      <button type="button" class="work-conflict-modal_close" data-work-conflict-takeover aria-label="Prevziať objednávku a zavrieť">×</button>
+      <span class="work-conflict-modal_warning">Upozornenie</span>
+      <strong id="work-conflict-title">Na tejto objednávke už niekto pracuje</strong>
+      <p id="work-conflict-message"></p>
+      <button type="button" class="button" data-work-conflict-takeover>Prevziať objednávku a pokračovať</button>
+    </section>
+  </div>
+<?php } ?>
 
 
 
