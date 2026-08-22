@@ -245,6 +245,7 @@ if (empty($page)) { //form
       const $notFoundTitle = $("#product-not-found-title");
       const $notFoundCodes = $("#product-not-found-codes");
       let controlLogSent = false;
+      let $scanErrorFocusInput = $barcodeInput;
 
       function logSuccessfulControl() {
         if (controlLogSent) {
@@ -291,9 +292,10 @@ if (empty($page)) { //form
         };
       }
 
-      function showScanError(message, code) {
+      function showScanError(message, code, $focusInput) {
         const $code = $("<strong>").text(code);
 
+        $scanErrorFocusInput = $focusInput && $focusInput.length ? $focusInput : $barcodeInput;
         $notFoundTitle.text(message);
         $notFoundCodes.append($code);
         $notFound.addClass("is-active").attr("aria-hidden", "false");
@@ -380,7 +382,7 @@ if (empty($page)) { //form
       $notFound.on("click", function() {
         $notFound.removeClass("is-active").attr("aria-hidden", "true");
         $notFoundCodes.empty();
-        $barcodeInput.val("").trigger("focus");
+        $scanErrorFocusInput.val("").trigger("focus");
       });
 
       $barcodeInput.trigger("focus");
@@ -431,8 +433,12 @@ if (empty($page)) { //form
           }
         }).done(function(response) {
           if (!response.success) {
-            $message.addClass("is-error").text(response.message || "Objednávku sa nepodarilo uložiť do boxu.");
-            $codeInput.val("").trigger("focus");
+            $message.removeClass("is-error is-success").text("");
+            showScanError(
+              response.message || "Objednávku sa nepodarilo uložiť do boxu.",
+              code,
+              $codeInput
+            );
             return;
           }
 
@@ -440,8 +446,12 @@ if (empty($page)) { //form
           $("#box-assignment-completed").removeAttr("hidden");
         }).fail(function(xhr) {
           const response = xhr.responseJSON || {};
-          $message.addClass("is-error").text(response.message || "Objednávku sa nepodarilo uložiť do boxu.");
-          $codeInput.val("").trigger("focus");
+          $message.removeClass("is-error is-success").text("");
+          showScanError(
+            response.message || "Objednávku sa nepodarilo uložiť do boxu.",
+            code,
+            $codeInput
+          );
         });
       });
 
