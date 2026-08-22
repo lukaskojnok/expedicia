@@ -123,6 +123,49 @@ if (empty($page)) { //form
       <script>
       $(function() {
         const $barcodeInput = $("#barcode-input");
+        const $notFound = $("#order-not-found");
+        const $notFoundTitle = $("#order-not-found-title");
+        const $notFoundCodes = $("#order-not-found-codes");
+
+        function playWarningSound() {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+          if (!AudioContext) {
+            return;
+          }
+
+          const audioContext = new AudioContext();
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+
+          oscillator.type = "square";
+          oscillator.frequency.setValueAtTime(780, audioContext.currentTime);
+          oscillator.frequency.setValueAtTime(520, audioContext.currentTime + 0.16);
+          gain.gain.setValueAtTime(0.18, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+          oscillator.connect(gain);
+          gain.connect(audioContext.destination);
+          oscillator.start();
+          oscillator.stop(audioContext.currentTime + 0.35);
+
+          oscillator.onended = function() {
+            audioContext.close();
+          };
+        }
+
+        function showScanError(message, code) {
+          $notFoundTitle.text(message);
+          $notFoundCodes.empty().append($("<strong>").text(code));
+          $notFound.addClass("is-active").attr("aria-hidden", "false");
+          playWarningSound();
+          $barcodeInput.val("");
+        }
+
+        $notFound.on("click", function() {
+          $notFound.removeClass("is-active").attr("aria-hidden", "true");
+          $notFoundCodes.empty();
+          $barcodeInput.trigger("focus");
+        });
 
         $barcodeInput.trigger("focus");
 
@@ -136,64 +179,44 @@ if (empty($page)) { //form
           e.preventDefault();
 
           const code = ($barcodeInput.val() || "").trim();
-          let invoiceUrl = "";
 
           if (code === "") {
             $barcodeInput.trigger("focus");
             return;
           }
 
-          $(".invoice-row").each(function() {
-            const invoiceNumber = ($(this).attr("data-invoice-number") || "").trim();
-            const orderNumber = ($(this).attr("data-order-number") || "").trim();
-
-            if (code === invoiceNumber || code === orderNumber) {
-              invoiceUrl = $(this).attr("data-url") || "";
-              return false;
+          $.ajax({
+            url: "/scripts/find_order.php",
+            method: "POST",
+            dataType: "json",
+            data: {
+              code: code,
+              typ_kontroly: "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>"
             }
+          }).done(function(response) {
+            if (response.success && response.url) {
+              showPreloader();
+              window.location.href = response.url;
+              return;
+            }
+
+            showScanError(response.message || "Objednávka sa nenašla.", code);
+          }).fail(function(xhr) {
+            const response = xhr.responseJSON || {};
+            showScanError(response.message || "Objednávka sa nenašla.", code);
           });
-
-          if (invoiceUrl === "") {
-            const $box = $("[data-expedicny-box-code]").filter(function() {
-              return String($(this).data("expedicny-box-code") || "").trim().toUpperCase() === code.toUpperCase();
-            }).first();
-
-            if ($box.length) {
-              const boxOrderId = parseInt($box.data("order-id"), 10) || 0;
-
-              if (boxOrderId > 0 && "<?= $typ_kontroly ?>" === "expedicia") {
-                invoiceUrl = "/invoice?id=" + boxOrderId + "&typ=expedicia";
-              } else if (boxOrderId <= 0) {
-                alert("Expedičný box " + code + " je prázdny.");
-                $barcodeInput.val("").trigger("focus");
-                return;
-              } else {
-                alert("Expedičné boxy sa otvárajú v režime expedície.");
-                $barcodeInput.val("").trigger("focus");
-                return;
-              }
-            }
-          }
-
-          if (invoiceUrl !== "") {
-            showPreloader();
-            window.location.href = invoiceUrl;
-            return;
-          }
-
-          alert("Objednávka, faktúra alebo expedičný box s kódom " + code + " sa nenašli.");
-
-          $barcodeInput.val("").trigger("focus");
         });
       });
       </script>
 
   </div>
 </footer>
-<div class="expedicne-boxy-scan-data" hidden>
-  <?php foreach ($expedicne_boxy as $expedicny_box) { ?>
-    <span data-expedicny-box-code="<?= htmlspecialchars($expedicny_box["kod"], ENT_QUOTES, "UTF-8") ?>" data-order-id="<?= (int) ($expedicny_box["order_id"] ?? 0) ?>"></span>
-  <?php } ?>
+<div class="product-not-found" id="order-not-found" aria-hidden="true">
+  <div class="product-not-found_content">
+    <span id="order-not-found-title">Objednávka sa nenašla</span>
+    <div class="product-not-found_codes" id="order-not-found-codes"></div>
+    <small>Kliknutím kdekoľvek zatvorte hlášku</small>
+  </div>
 </div>
 <?php
 } elseif ($page === "invoice") { //form
