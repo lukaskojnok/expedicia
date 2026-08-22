@@ -1,4 +1,20 @@
 <?php
+if (isset($_GET["logout"]) AND $_GET["logout"] == 1) {
+  $query = $GLOBALS["db"]->prepare("DELETE FROM admins_logs WHERE unique_code=:unique_code")->execute(["unique_code" => $_COOKIE["loginADMIN_unique_code"]]);
+
+  setcookie("loginADMIN", "", time(), "/");
+  setcookie("loginADMIN_unique_code", "", time(), "/");
+  header("Location: login.php");
+  exit;
+}
+
+if (!isset($_COOKIE["loginADMIN"]) or !isset($_COOKIE["loginADMIN_unique_code"])) {
+  header("Location: login.php");
+  exit;
+} else {
+  setcookie("loginADMIN", "$_COOKIE[loginADMIN]", time() + 60 * 60 * 3, "/");
+}
+
 //////////////// LOGIN admin
 function unique_code_admin_login( $login, $ip, $user_agent, $session_id ) {
   //return hash('sha512', $login . $ip . $user_agent . $session_id );
@@ -104,7 +120,14 @@ $status_classes = [
   "ukoncene" => "status-done"
 ];
 
-$typ_kontroly = isset($_GET["typ"]) ? $_GET["typ"] : "expedicia";
+function order_is_cod($order) {
+  $payment_code = strtoupper(trim((string) ($order["platba_kod"] ?? "")));
+  $payment_name = strtolower(trim((string) ($order["platba_nazov"] ?? "")));
+
+  return $payment_code === "BILLING3" || strpos($payment_name, "dobier") !== false;
+}
+
+$typ_kontroly = isset($_GET["typ"]) ? $_GET["typ"] : "vyskladnenie";
 
 if (!in_array($typ_kontroly, $allowed_types, true)) {
   $typ_kontroly = "expedicia";
@@ -209,6 +232,8 @@ if ($page === "invoice") {
   $doprava_nazov = ($shipping_data["name"] ?? "") ?: ($order["doprava_nazov"] ?: "Neuvedená doprava");
   $mena = $order["mena"] ?: "EUR";
   $suma_objednavky = number_format((float) $order["cena_na_uhradu"], 2, ",", " ");
+  $je_dobierka = order_is_cod($order);
+  $je_neuhradene_bez_dobierky = !$je_dobierka && empty($order["uhradene"]);
   $datum = "—";
 
   if (!empty($order["datum_objednavky"])) {

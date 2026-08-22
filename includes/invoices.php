@@ -87,6 +87,8 @@
           );
 
           $mena = $result["mena"] ?: "EUR";
+          $je_dobierka = order_is_cod($result);
+          $je_neuhradene_bez_dobierky = !$je_dobierka && empty($result["uhradene"]);
           ?>
 
           <?php
@@ -170,12 +172,27 @@
             <td class="data-table_price">
               <?= htmlspecialchars($suma_objednavky, ENT_QUOTES, "UTF-8") ?>
               <?= htmlspecialchars($mena, ENT_QUOTES, "UTF-8") ?>
+
+              <?php if ($je_dobierka) { ?>
+                <div class="payment-info payment-info_cod">Platba: Dobierka</div>
+              <?php } elseif ($je_neuhradene_bez_dobierky) { ?>
+                <div class="payment-info payment-info_warning">Pozor: objednávka nie je uhradená</div>
+              <?php } elseif (!empty($result["platba_nazov"])) { ?>
+                <div class="payment-info">Platba: <?= htmlspecialchars($result["platba_nazov"], ENT_QUOTES, "UTF-8") ?></div>
+              <?php } ?>
             </td>
 
             <td>
-              <span class="status <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>">
+              <button
+                type="button"
+                class="status order-logs-open <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"
+                data-order-id="<?= (int) $result["id"] ?>"
+                data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
+                title="Zobraziť históriu objednávky"
+                nofocus
+              >
                 <?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?>
-              </span>
+              </button>
 
               <?php if (!empty($result["zmena"])) { ?>
                 <span

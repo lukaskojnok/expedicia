@@ -141,6 +141,9 @@ try {
     $doprava_typ = null;
     $doprava_nazov = null;
     $doprava_kod = null;
+    $platba_typ = null;
+    $platba_nazov = null;
+    $platba_kod = null;
 
     foreach ($order->ORDER_ITEMS->ITEM as $item) {
       $item_type = xml_text($item->TYPE);
@@ -177,6 +180,12 @@ try {
         $doprava_typ = $item_type;
         $doprava_nazov = $item_nazov;
         $doprava_kod = $item_kod;
+      }
+
+      if ($item_type === "billing") {
+        $platba_typ = $item_type;
+        $platba_nazov = $item_nazov;
+        $platba_kod = $item_kod;
       }
     }
 
@@ -236,6 +245,10 @@ try {
       ":cena_na_uhradu" => xml_decimal($order->TOTAL_PRICE->PRICE_TO_PAY, 2),
       ":uhradene" => (int) xml_text($order->TOTAL_PRICE->PAID),
       ":uhradena_suma" => xml_decimal($order->TOTAL_PRICE->AMOUNT_PAID, 2),
+
+      ":platba_typ" => $platba_typ,
+      ":platba_nazov" => $platba_nazov,
+      ":platba_kod" => $platba_kod,
 
       ":doprava_typ" => $doprava_typ,
       ":doprava_nazov" => $doprava_nazov,
@@ -305,6 +318,10 @@ try {
           cena_na_uhradu = :cena_na_uhradu,
           uhradene = :uhradene,
           uhradena_suma = :uhradena_suma,
+
+          platba_typ = :platba_typ,
+          platba_nazov = :platba_nazov,
+          platba_kod = :platba_kod,
 
           doprava_typ = :doprava_typ,
           doprava_nazov = :doprava_nazov,
@@ -380,6 +397,10 @@ try {
           cena_na_uhradu = :cena_na_uhradu,
           uhradene = :uhradene,
           uhradena_suma = :uhradena_suma,
+
+          platba_typ = :platba_typ,
+          platba_nazov = :platba_nazov,
+          platba_kod = :platba_kod,
 
           doprava_typ = :doprava_typ,
           doprava_nazov = :doprava_nazov,

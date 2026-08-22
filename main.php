@@ -22,7 +22,7 @@
       <?php } ?>
 
       <span>Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></span>
-      <a href="/logout.php" class="topbar_logout">Odhlásiť sa</a>
+      <a href="?logout=1" class="topbar_logout">Odhlásiť sa</a>
     </nav>
 
   </div>
@@ -326,6 +326,7 @@ if (empty($page)) { //form
       const $shipmentCompleted = $("#shipment-completed");
       const $shipmentCompletedWarning = $("#shipment-completed-warning");
       const $shipmentCompletedLabels = $("#shipment-completed-labels");
+      const $codAmount = $("#shipment-cod-amount");
       let $activeWeight = $parcels.find(".shipment-weight").first();
 
       function updateParcelLabels() {
@@ -351,7 +352,10 @@ if (empty($page)) { //form
       }
 
       function updateShipmentSubmit() {
-        $shipmentButtons.prop("disabled", getShipmentWeights().length === 0);
+        const codAmount = parseFloat(String($codAmount.val() || "").replace(",", "."));
+        const codIsValid = !$codAmount.length || codAmount > 0;
+
+        $shipmentButtons.prop("disabled", getShipmentWeights().length === 0 || !codIsValid);
       }
 
       function formatApiResponse(apiResponse) {
@@ -423,6 +427,8 @@ if (empty($page)) { //form
         selectWeight($(this));
         updateShipmentSubmit();
       });
+
+      $codAmount.on("input", updateShipmentSubmit);
 
       $("#shipment-add-parcel").on("click", function() {
         const $newParcel = $parcels.find(".shipment-parcel").first().clone();
@@ -498,6 +504,7 @@ if (empty($page)) { //form
             order_id: $shipmentForm.data("order-id"),
             typ_kontroly: $shipmentForm.data("control-type"),
             weights: weights,
+            cod_amount: $codAmount.length ? $codAmount.val() : "",
             print_label: printLabel ? 1 : 0
           }
         }).done(function(response) {
