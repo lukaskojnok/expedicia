@@ -22,7 +22,19 @@
       <?php } ?>
 
       <span>Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></span>
-      <a href="/logout.php" class="topbar_logout">Odhlásiť sa</a>
+      <div class="topbar-dropdown" nofocus>
+        <button type="button" class="topbar-hamburger" aria-expanded="false" aria-controls="topbar-dropdown-menu" aria-label="Otvoriť menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
+          <div class="topbar-dropdown_mode">Aktuálne: <strong class="type"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
+          <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>">
+            Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
+          </a>
+          <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
+          <a href="/logout.php">Odhlásiť sa</a>
+        </div>
+      </div>
     </nav>
 
   </div>
@@ -33,6 +45,8 @@
   <?php
   if ($page === "invoice") {
     require __DIR__ . "/includes/invoice.php";
+  } elseif ($page === "expedicne-boxy") {
+    require __DIR__ . "/includes/expedicne-boxy.php";
   } else {
     require __DIR__ . "/includes/invoices.php";
   }
@@ -75,7 +89,7 @@ if (empty($page)) { //form
           name="code"
           id="barcode-input"
           class="footbar_input"
-          placeholder="Číslo objednávky alebo faktúry"
+          placeholder="Číslo objednávky, faktúry alebo expedičného boxu"
           autocomplete="off"
           autofocus
         >
@@ -116,13 +130,35 @@ if (empty($page)) { //form
             }
           });
 
+          if (invoiceUrl === "") {
+            const $box = $("[data-expedicny-box-code]").filter(function() {
+              return String($(this).data("expedicny-box-code") || "").trim().toUpperCase() === code.toUpperCase();
+            }).first();
+
+            if ($box.length) {
+              const boxOrderId = parseInt($box.data("order-id"), 10) || 0;
+
+              if (boxOrderId > 0 && "<?= $typ_kontroly ?>" === "expedicia") {
+                invoiceUrl = "/invoice?id=" + boxOrderId + "&typ=expedicia";
+              } else if (boxOrderId <= 0) {
+                alert("Expedičný box " + code + " je prázdny.");
+                $barcodeInput.val("").trigger("focus");
+                return;
+              } else {
+                alert("Expedičné boxy sa otvárajú v režime expedície.");
+                $barcodeInput.val("").trigger("focus");
+                return;
+              }
+            }
+          }
+
           if (invoiceUrl !== "") {
             showPreloader();
             window.location.href = invoiceUrl;
             return;
           }
 
-          alert("Faktúra alebo objednávka s číslom " + code + " sa nenašla.");
+          alert("Objednávka, faktúra alebo expedičný box s kódom " + code + " sa nenašli.");
 
           $barcodeInput.val("").trigger("focus");
         });
@@ -131,8 +167,13 @@ if (empty($page)) { //form
 
   </div>
 </footer>
+<div class="expedicne-boxy-scan-data" hidden>
+  <?php foreach ($expedicne_boxy as $expedicny_box) { ?>
+    <span data-expedicny-box-code="<?= htmlspecialchars($expedicny_box["kod"], ENT_QUOTES, "UTF-8") ?>" data-order-id="<?= (int) ($expedicny_box["order_id"] ?? 0) ?>"></span>
+  <?php } ?>
+</div>
 <?php
-} else { //form
+} elseif ($page === "invoice") { //form
 ?>
 <footer class="footbar">
   <div class="footbar_inner">
@@ -233,7 +274,10 @@ if (empty($page)) { //form
           logSuccessfulControl();
 
           setTimeout(function() {
-            $(".shipment-weight").first().trigger("focus");
+            const $nextInput = $("#box-assignment-code").length
+              ? $("#box-assignment-code")
+              : $(".shipment-weight").first();
+            $nextInput.trigger("focus");
           }, 0);
         }
       }
@@ -314,6 +358,47 @@ if (empty($page)) { //form
       });
 
       const $shipmentForm = $("#shipment-form");
+      const $boxAssignmentForm = $("#box-assignment-form");
+
+      $boxAssignmentForm.on("submit", function(event) {
+        event.preventDefault();
+
+        const $codeInput = $("#box-assignment-code");
+        const $message = $("#box-assignment-message");
+        const code = String($codeInput.val() || "").trim();
+
+        if (code === "") {
+          $codeInput.trigger("focus");
+          return;
+        }
+
+        $message.removeClass("is-error is-success").text("Ukladám…");
+
+        $.ajax({
+          url: "/scripts/expedicny_box_assign.php",
+          method: "POST",
+          dataType: "json",
+          data: {
+            order_id: $("#box-assignment").data("order-id"),
+            kod: code,
+            csrf_token: $("#box-assignment-csrf").val()
+          }
+        }).done(function(response) {
+          if (!response.success) {
+            $message.addClass("is-error").text(response.message || "Objednávku sa nepodarilo uložiť do boxu.");
+            $codeInput.val("").trigger("focus");
+            return;
+          }
+
+          $("#box-assignment").attr("hidden", "hidden");
+          $("#box-assignment-completed").removeAttr("hidden");
+          $("#box-assignment-completed-text").text("Expedičný box: " + response.kod);
+        }).fail(function(xhr) {
+          const response = xhr.responseJSON || {};
+          $message.addClass("is-error").text(response.message || "Objednávku sa nepodarilo uložiť do boxu.");
+          $codeInput.val("").trigger("focus");
+        });
+      });
 
       if (!$shipmentForm.length) {
         return;

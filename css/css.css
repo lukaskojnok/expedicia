@@ -40,11 +40,44 @@ a {
 .topbar_menu strong {
   font-weight: 600; color: #fff;
 }
+.topbar_menu strong.type {
+  color: #000;
+}
 .topbar_logout {
   display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 20px; font-size: 13px; font-weight: 600; color: #fff; background: #354057;
 }
 .topbar_logout:hover {
   color: #fff; background: #46536c;
+}
+.topbar-dropdown {
+  position: relative; display: flex; align-items: center;
+}
+.topbar-hamburger {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 52px; height: 46px; padding: 0; background: #354057; border: 0; cursor: pointer;
+}
+.topbar-hamburger:hover {
+  background: #46536c;
+}
+.topbar-hamburger span {
+  display: block; width: 22px; height: 2px; margin: 0; background: #fff;
+}
+.topbar-dropdown_menu {
+  position: absolute; z-index: 300; top: 54px; right: 0; width: 260px; color: #172033; background: #fff; border: 1px solid #dce1e8; box-shadow: 0 10px 30px rgba(23, 32, 51, .2);
+}
+.topbar-dropdown_menu[hidden] {
+  display: none;
+}
+.topbar-dropdown_menu a, .topbar-dropdown_mode {
+  display: block; padding: 15px 18px; font-size: 13px; color: #273044; border-bottom: 1px solid #e4e8ee;
+}
+.topbar-dropdown_menu a:last-child {
+  border-bottom: 0;
+}
+.topbar-dropdown_menu a:hover {
+  color: #fff; background: #246bfe;
+}
+.topbar-dropdown_mode {
+  color: #657084; background: #f3f5f8;
 }
 .content-main {
   width: 100%; padding: 24px;
@@ -224,7 +257,7 @@ a {
   cursor: pointer; user-select: none;
 }
 .invoice-summary {
-  position: sticky; z-index: 60; top: 72px; display: grid; grid-template-columns: minmax(145px, .9fr) minmax(120px, .8fr) minmax(210px, 1.2fr) minmax(170px, 1fr) minmax(90px, .55fr) minmax(140px, .85fr) minmax(120px, .75fr) minmax(260px, 1.45fr); width: 100%; margin: 0 0 12px; border: 1px solid #dce1e8; background: #fff; box-shadow: 0 5px 14px rgba(23, 32, 51, .08);
+  position: sticky; z-index: 60; top: 72px; display: grid; grid-template-columns: minmax(125px, .8fr) minmax(105px, .7fr) minmax(180px, 1.1fr) minmax(145px, .9fr) minmax(75px, .5fr) minmax(125px, .8fr) minmax(105px, .7fr) minmax(105px, .7fr) minmax(220px, 1.3fr); width: 100%; margin: 0 0 12px; border: 1px solid #dce1e8; background: #fff; box-shadow: 0 5px 14px rgba(23, 32, 51, .08);
 }
 .invoice-summary_item {
   display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 88px; padding: 14px 18px; border-right: 1px solid #e2e6ec;
@@ -355,6 +388,30 @@ a {
 }
 .invoice-control-success span {
   display: block; font-size: 16px; color: #38785b;
+}
+.box-assignment {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px;
+}
+.box-assignment_form {
+  display: flex; width: 100%; max-width: 720px; margin: 30px auto 0;
+}
+.box-assignment_input {
+  width: 100%; height: 66px; padding: 0 20px; font-family: inherit; font-size: 22px; color: #172033; background: #fff; border: 2px solid #246bfe; outline: 0;
+}
+.box-assignment_form .button {
+  height: 66px; border: 0; cursor: pointer;
+}
+.box-assignment_message {
+  min-height: 28px; margin: 18px 0 0; font-weight: 700;
+}
+.box-assignment_message.is-error {
+  color: #b42318;
+}
+.box-assignment_message.is-success {
+  color: #14673d;
+}
+.expedicne-boxy-table strong {
+  font-size: 18px; color: #172033;
 }
 .shipment-form {
   display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1400px; margin: 0 auto; padding: 0; text-align: left; color: #172033; background: transparent !important; border: 0 !important;
