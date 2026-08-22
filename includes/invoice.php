@@ -74,17 +74,33 @@ function getShoptetProductImageUrl($code, $token) {
   </div>
 
   <div class="invoice-summary_item">
-    <span>Stav</span>
+    <span>Vyskladnenie</span>
     <strong>
       <button
         type="button"
-        class="status order-logs-open <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"
+        class="status order-logs-open <?= htmlspecialchars($status_classes[$order["status_vyskladnenie"]] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
         data-order-id="<?= (int) $order["id"] ?>"
         data-order-number="<?= htmlspecialchars((string) $order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
         title="Zobraziť históriu objednávky"
         nofocus
       >
-        <?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?>
+        <?= htmlspecialchars($status_labels[$order["status_vyskladnenie"]] ?? $order["status_vyskladnenie"], ENT_QUOTES, "UTF-8") ?>
+      </button>
+    </strong>
+  </div>
+
+  <div class="invoice-summary_item">
+    <span>Expedícia</span>
+    <strong>
+      <button
+        type="button"
+        class="status order-logs-open <?= htmlspecialchars($status_classes[$order["status_expedicia"]] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
+        data-order-id="<?= (int) $order["id"] ?>"
+        data-order-number="<?= htmlspecialchars((string) $order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
+        title="Zobraziť históriu objednávky"
+        nofocus
+      >
+        <?= htmlspecialchars($status_labels[$order["status_expedicia"]] ?? $order["status_expedicia"], ENT_QUOTES, "UTF-8") ?>
       </button>
     </strong>
   </div>
@@ -178,7 +194,22 @@ function getShoptetProductImageUrl($code, $token) {
 </div>
 
 <div class="invoice-control-success" id="invoice-control-success" hidden>
-  <?php if (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
+  <?php if ($typ_kontroly === "vyskladnenie") { ?>
+    <div class="box-assignment" id="box-assignment" data-order-id="<?= (int) $order["id"] ?>">
+      <strong>Úspešne vyskladnené</strong>
+      <span>Naskenujte expedičný box, do ktorého ste objednávku uložili.</span>
+      <form class="box-assignment_form" id="box-assignment-form" nofocus>
+        <input type="hidden" id="box-assignment-csrf" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+        <input type="text" id="box-assignment-code" class="box-assignment_input" placeholder="Kód expedičného boxu" autocomplete="off">
+        <button type="submit" class="button">Uložiť do boxu</button>
+      </form>
+      <div class="box-assignment_message" id="box-assignment-message" aria-live="polite"></div>
+    </div>
+    <div class="shipment-completed" id="box-assignment-completed" hidden>
+      <strong>Objednávka je pripravená na expedíciu</strong>
+      <a href="/?typ=vyskladnenie" class="shipment-back-button">Späť na objednávky / faktúry</a>
+    </div>
+  <?php } elseif (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
     <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" data-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>" nofocus>
       <div class="shipment-layout">
         <div class="shipment-panel shipment-panel_weights">

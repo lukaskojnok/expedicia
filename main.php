@@ -27,7 +27,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
-          <div class="topbar-dropdown_mode">Aktuálne: <strong class="type"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
+          <div class="topbar-dropdown_mode">Aktuálne: <strong><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
           <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>">
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
@@ -392,7 +392,6 @@ if (empty($page)) { //form
 
           $("#box-assignment").attr("hidden", "hidden");
           $("#box-assignment-completed").removeAttr("hidden");
-          $("#box-assignment-completed-text").text("Expedičný box: " + response.kod);
         }).fail(function(xhr) {
           const response = xhr.responseJSON || {};
           $message.addClass("is-error").text(response.message || "Objednávku sa nepodarilo uložiť do boxu.");

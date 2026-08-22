@@ -37,8 +37,6 @@ $page = ( isset( $_GET["page"] ) ? $_GET["page"] : "" ); $page = strip_tags($pag
 $page2 = ( isset( $_GET["page2"] ) ? $_GET["page2"] : "" ); $page2 = strip_tags($page2);
 $page3 = ( isset( $_GET["page3"] ) ? $_GET["page3"] : "" ); $page3 = strip_tags($page3);
 
-include_once("consts.php");
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////// LANGS
 
 $jazyky_arr["sk"] = "Slovenčina";
