@@ -11,7 +11,8 @@
         <th>Dátum</th>
         <th>Položky</th>
         <th>Suma</th>
-        <th><?= htmlspecialchars($status_title, ENT_QUOTES, "UTF-8") ?></th>
+        <th>Vyskladnenie</th>
+        <th>Expedícia</th>
         <th>Pracuje</th>
         <!-- <th></th> -->
       </tr>
@@ -28,6 +29,8 @@
 
           $status_label = $status_labels[$status] ?? $status;
           $status_class = $status_classes[$status] ?? "status-waiting";
+          $status_vyskladnenie = $result["status_vyskladnenie"] ?? "nove";
+          $status_expedicia = $result["status_expedicia"] ?? "nove";
           $working_user_name = trim((string) ($result["working_user_name"] ?? ""));
 
           $row_classes = [];
@@ -186,13 +189,13 @@
             <td>
               <button
                 type="button"
-                class="status order-logs-open <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"
+                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_vyskladnenie] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
                 data-order-id="<?= (int) $result["id"] ?>"
                 data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
                 title="Zobraziť históriu objednávky"
                 nofocus
               >
-                <?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?>
+                <?= htmlspecialchars($status_labels[$status_vyskladnenie] ?? $status_vyskladnenie, ENT_QUOTES, "UTF-8") ?>
               </button>
 
               <?php if (!empty($result["zmena"])) { ?>
@@ -203,6 +206,19 @@
                   Zmenené
                 </span>
               <?php } ?>
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_expedicia] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
+                data-order-id="<?= (int) $result["id"] ?>"
+                data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
+                title="Zobraziť históriu objednávky"
+                nofocus
+              >
+                <?= htmlspecialchars($status_labels[$status_expedicia] ?? $status_expedicia, ENT_QUOTES, "UTF-8") ?>
+              </button>
             </td>
 
             <td class="order-worker" data-order-worker-id="<?= (int) $result["id"] ?>">
@@ -237,7 +253,7 @@
       <?php } else { ?>
 
         <tr>
-          <td colspan="9" class="data-table_empty">
+          <td colspan="10" class="data-table_empty">
             Nenašli sa žiadne objednávky.
           </td>
         </tr>

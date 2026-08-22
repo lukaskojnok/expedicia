@@ -188,37 +188,35 @@ if ($page === "invoice") {
   $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
   
 } else {
-  $zobrazit_statusy = [
-    "nove",
-    "v_procese",
-    "ukoncene"
-  ];
-
-  $zobrazit_statusy = array_values(
-    array_intersect($zobrazit_statusy, $allowed_statuses)
-  );
-
-  if (empty($zobrazit_statusy)) {
-    $zobrazit_statusy = $allowed_statuses;
+  if ($typ_kontroly === "vyskladnenie") {
+    $orders_where_sql = "orders.status_vyskladnenie IN ('nove', 'v_procese')";
+    $orders_status_order_sql = "
+      CASE orders.status_vyskladnenie
+        WHEN 'nove' THEN 1
+        WHEN 'v_procese' THEN 2
+        ELSE 3
+      END
+    ";
+  } else {
+    $orders_where_sql = "orders.status_vyskladnenie = 'ukoncene'";
+    $orders_status_order_sql = "
+      CASE orders.status_expedicia
+        WHEN 'nove' THEN 1
+        WHEN 'v_procese' THEN 2
+        WHEN 'ukoncene' THEN 3
+        ELSE 4
+      END
+    ";
   }
 
-  $status_placeholders = [];
-  $status_parameters = [];
-
-  foreach ($zobrazit_statusy as $status_key => $status_value) {
-    $placeholder = ":status_{$status_key}";
-
-    $status_placeholders[] = $placeholder;
-    $status_parameters[$placeholder] = $status_value;
-  }
-
-  $status_placeholders_sql = implode(", ", $status_placeholders);
-
-  $query = $db->prepare("
+  $query = $db->query("
     SELECT
       orders.*,
+      working_admin.name AS working_user_name,
       COALESCE(items_count.pocet_poloziek, 0) AS pocet_poloziek
     FROM orders
+    LEFT JOIN admins AS working_admin
+      ON working_admin.id = orders.{$user_column}
     LEFT JOIN (
       SELECT
         order_id,
@@ -232,20 +230,13 @@ if ($page === "invoice") {
       GROUP BY order_id
     ) AS items_count
       ON items_count.order_id = orders.id
-    WHERE orders.{$status_column} IN ({$status_placeholders_sql})
+    WHERE {$orders_where_sql}
     ORDER BY
+      {$orders_status_order_sql},
       orders.zmena DESC,
-      CASE orders.{$status_column}
-        WHEN 'nove' THEN 1
-        WHEN 'v_procese' THEN 2
-        WHEN 'ukoncene' THEN 3
-        ELSE 4
-      END,
-      orders.datum_objednavky DESC,
-      orders.id DESC
+      orders.datum_objednavky ASC,
+      orders.id ASC
   ");
-
-  $query->execute($status_parameters);
 
   $results = $query->fetchAll(PDO::FETCH_ASSOC);
   $pocet_faktur = count($results);
