@@ -13,7 +13,7 @@
         <th>Suma</th>
         <th><?= htmlspecialchars($status_title, ENT_QUOTES, "UTF-8") ?></th>
         <th>Pracuje</th>
-        <th></th>
+        <!-- <th></th> -->
       </tr>
     </thead>
 
@@ -48,7 +48,7 @@
             $datum_timestamp = strtotime($result["datum_objednavky"]);
 
             if ($datum_timestamp !== false) {
-              $datum = date("d. m. Y, H:i", $datum_timestamp);
+              $datum = date("d.m. H:i", $datum_timestamp);
             }
           }
 
@@ -162,11 +162,11 @@
               <?php } ?>
             </td>
 
-            <td>
+            <td align="center">
               <?= htmlspecialchars($datum, ENT_QUOTES, "UTF-8") ?>
             </td>
 
-            <td>
+            <td align="center">
               <?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?>
             </td>
 
@@ -221,14 +221,14 @@
               <?php } ?>
             </td>
 
-            <td class="data-table_action">
+            <!-- <td class="data-table_action">
               <a
                 href="<?= htmlspecialchars($invoice_url, ENT_QUOTES, "UTF-8") ?>"
                 class="<?= htmlspecialchars($button_class, ENT_QUOTES, "UTF-8") ?>"
               >
                 <?= htmlspecialchars($button_text, ENT_QUOTES, "UTF-8") ?>
               </a>
-            </td>
+            </td> -->
 
           </tr>
 
@@ -237,7 +237,7 @@
       <?php } else { ?>
 
         <tr>
-          <td colspan="10" class="data-table_empty">
+          <td colspan="9" class="data-table_empty">
             Nenašli sa žiadne objednávky.
           </td>
         </tr>

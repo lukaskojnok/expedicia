@@ -10,7 +10,7 @@ require_once __DIR__ . "/../config/common.php";
 $zdroj = "shoptet";
 $zdroj_eshop = "okfish.sk";
 
-$shoptet_orders_hash = "4378994d144881948514ed71027ac4e2be9043bde6f471de9cda245749b21c62";
+$shoptet_orders_hash = SHOPTET_HASH_ORDERS;
 
 $update_time_from = "18.08.2026 08:00:00";
 
