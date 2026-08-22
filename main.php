@@ -22,7 +22,7 @@
       <?php } ?>
 
       <span>Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></span>
-      <a href="?logout=1" class="topbar_logout">Odhlásiť sa</a>
+      <a href="/logout.php" class="topbar_logout">Odhlásiť sa</a>
     </nav>
 
   </div>

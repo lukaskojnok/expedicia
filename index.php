@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if ( isset($_GET["doo"]) AND $_GET["doo"] == 1 ):
  setcookie("doo", "1", time() + 2592000, "/");
@@ -19,5 +18,4 @@ if ( $_SERVER["REMOTE_ADDR"] == "45.152.96.6" OR isset($_COOKIE["doo"]) ) {
 } else {
   require_once("indexMAIN.php");
 }
-
 

@@ -6,29 +6,15 @@ function controls_get_admin_data($db) {
     return $ADMIN_DATA;
   }
 
-  $login = trim((string) ($_COOKIE["loginADMIN"] ?? ""));
-  $unique_code = trim((string) ($_COOKIE["loginADMIN_unique_code"] ?? ""));
+  $admin_id = (int) ($_SESSION["admin_id"] ?? 0);
+  $login = trim((string) ($_SESSION["admin_login"] ?? ""));
 
-  if ($login === "" || $unique_code === "") {
+  if ($admin_id <= 0 || $login === "") {
     return [];
   }
 
-  $query = $db->prepare("SELECT login, ip, user_agent, unique_code FROM admins_logs WHERE unique_code = :unique_code LIMIT 1");
-  $query->execute([":unique_code" => $unique_code]);
-  $login_log = $query->fetch(PDO::FETCH_ASSOC);
-
-  if (!$login_log) {
-    return [];
-  }
-
-  $expected_code = hash("sha512", $login_log["login"] . $login_log["ip"] . $login_log["user_agent"]);
-
-  if (!hash_equals($expected_code, $unique_code) || $login_log["login"] !== $login) {
-    return [];
-  }
-
-  $query = $db->prepare("SELECT id, login, email, name, permissions FROM admins WHERE login = :login AND active = 1 LIMIT 1");
-  $query->execute([":login" => $login]);
+  $query = $db->prepare("SELECT id, login, email, name, permissions FROM admins WHERE id = :id AND login = :login AND active = 1 LIMIT 1");
+  $query->execute([":id" => $admin_id, ":login" => $login]);
   $ADMIN_DATA = $query->fetch(PDO::FETCH_ASSOC) ?: [];
 
   return $ADMIN_DATA;
