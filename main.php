@@ -28,7 +28,7 @@
         </button>
         <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
           <div class="topbar-dropdown_mode">Aktuálne: <strong class="black"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
-          <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>">
+          <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>" style="font-weight:bold">
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
           <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
@@ -244,6 +244,7 @@ if (empty($page)) { //form
       const $notFound = $("#product-not-found");
       const $notFoundTitle = $("#product-not-found-title");
       const $notFoundCodes = $("#product-not-found-codes");
+      const quickControl = "<?= htmlspecialchars((string) ($_GET["quick"] ?? ""), ENT_QUOTES, "UTF-8") ?>";
       let controlLogSent = false;
       let $scanErrorFocusInput = $barcodeInput;
 
@@ -407,16 +408,82 @@ if (empty($page)) { //form
 
       const $shipmentForm = $("#shipment-form");
       const $boxAssignmentForm = $("#box-assignment-form");
+      const $invoiceActionsToggle = $(".invoice-actions_toggle");
+      const $invoiceActionsMenu = $("#invoice-actions-menu");
+
+      $invoiceActionsToggle.on("click", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isOpen = !$invoiceActionsMenu.is("[hidden]");
+        $invoiceActionsMenu.attr("hidden", isOpen ? "hidden" : null);
+        $invoiceActionsToggle.attr("aria-expanded", isOpen ? "false" : "true");
+      });
+
+      $invoiceActionsMenu.on("click", function(event) {
+        event.stopPropagation();
+      });
+
+      $(document).on("click", function() {
+        $invoiceActionsMenu.attr("hidden", "hidden");
+        $invoiceActionsToggle.attr("aria-expanded", "false");
+      });
+
+      $("[data-order-delete]").on("click", function() {
+        const $button = $(this);
+
+        if (!window.confirm("Naozaj chcete vymazať objednávku aj všetky jej položky? Objednávka sa pri ďalšom importe môže nahrať nanovo.")) {
+          return;
+        }
+
+        $button.prop("disabled", true).text("Vymazávam…");
+
+        $.ajax({
+          url: "/scripts/delete_order.php",
+          method: "POST",
+          dataType: "json",
+          data: {
+            order_id: $button.data("order-id"),
+            csrf_token: $button.data("csrf-token")
+          }
+        }).done(function(response) {
+          if (response.success) {
+            showPreloader();
+            window.location.href = "/?typ=<?= urlencode($typ_kontroly) ?>";
+            return;
+          }
+
+          alert(response.message || "Objednávku sa nepodarilo vymazať.");
+          $button.prop("disabled", false).text("Vymazať objednávku");
+        }).fail(function(xhr) {
+          const response = xhr.responseJSON || {};
+          alert(response.message || "Objednávku sa nepodarilo vymazať.");
+          $button.prop("disabled", false).text("Vymazať objednávku");
+        });
+      });
+
+      $("#box-assignment-code").on("input", function() {
+        if (String($(this).val() || "").trim() !== "") {
+          $("#box-assignment-select").val("");
+        }
+      });
+
+      $("#box-assignment-select").on("change", function() {
+        if (String($(this).val() || "").trim() !== "") {
+          $("#box-assignment-code").val("");
+        }
+      });
 
       $boxAssignmentForm.on("submit", function(event) {
         event.preventDefault();
 
         const $codeInput = $("#box-assignment-code");
+        const $boxSelect = $("#box-assignment-select");
         const $message = $("#box-assignment-message");
-        const code = String($codeInput.val() || "").trim();
+        const code = String($codeInput.val() || $boxSelect.val() || "").trim();
 
         if (code === "") {
-          $codeInput.trigger("focus");
+          $boxSelect.trigger("focus");
           return;
         }
 
@@ -454,6 +521,12 @@ if (empty($page)) { //form
           );
         });
       });
+
+      if (quickControl === "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>") {
+        $(".invoice-item_amount_control").attr("item_amount", "0").text("0");
+        $("#invoice-items-box tbody tr").attr("hidden", "hidden");
+        showSuccessfulControl();
+      }
 
       if (!$shipmentForm.length) {
         return;
