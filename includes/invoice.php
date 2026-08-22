@@ -39,10 +39,10 @@ function getShoptetProductImageUrl($code, $token) {
     <strong nofocus><?= htmlspecialchars($order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?></strong>
   </div>
 
-  <div class="invoice-summary_item">
+  <!-- <div class="invoice-summary_item">
     <span>Faktúra</span>
     <strong><?= htmlspecialchars($order["cislo_faktury"] ?: "—", ENT_QUOTES, "UTF-8") ?></strong>
-  </div>
+  </div> -->
 
   <div class="invoice-summary_item invoice-summary_customer">
     <span>Zákazník</span>
@@ -207,7 +207,7 @@ function getShoptetProductImageUrl($code, $token) {
     </div>
     <div class="shipment-completed" id="box-assignment-completed" hidden>
       <strong>Objednávka je pripravená na expedíciu</strong>
-      <a href="/?typ=vyskladnenie" class="shipment-back-button">Späť na objednávky / faktúry</a>
+      <a href="/?typ=vyskladnenie" class="shipment-back-button">Späť na objednávky</a>
     </div>
   <?php } elseif (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
     <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" data-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>" nofocus>
@@ -275,7 +275,7 @@ function getShoptetProductImageUrl($code, $token) {
       <strong>Zásielka bola odoslaná dopravcovi</strong>
       <div class="shipment-completed_warning" id="shipment-completed-warning" hidden></div>
       <div class="shipment-completed_labels" id="shipment-completed-labels"></div>
-      <a href="/?typ=<?= urlencode($typ_kontroly) ?>" class="shipment-back-button">Späť na objednávky / faktúry</a>
+      <a href="/?typ=<?= urlencode($typ_kontroly) ?>" class="shipment-back-button">Späť na objednávky</a>
     </div>
   <?php } else { ?>
     <div class="shipment-not-available">Pre tento druh dopravy nie je zatiaľ nastavené odosielanie dopravcovi.</div>

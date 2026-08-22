@@ -1,6 +1,6 @@
 <div class="table-box">
 
-  <table class="data-table">
+  <table class="data-table" data-workers-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
     <thead>
       <tr>
         <!-- <th>Číslo faktúry</th> -->
@@ -11,8 +11,7 @@
         <th>Dátum</th>
         <th>Položky</th>
         <th>Suma</th>
-        <th>Vyskladnenie</th>
-        <th>Expedícia</th>
+        <th><?= htmlspecialchars($status_title, ENT_QUOTES, "UTF-8") ?></th>
         <th>Pracuje</th>
         <th></th>
       </tr>
@@ -29,8 +28,7 @@
 
           $status_label = $status_labels[$status] ?? $status;
           $status_class = $status_classes[$status] ?? "status-waiting";
-          $status_vyskladnenie = $result["status_vyskladnenie"] ?? "nove";
-          $status_expedicia = $result["status_expedicia"] ?? "nove";
+          $working_user_name = trim((string) ($result["working_user_name"] ?? ""));
 
           $row_classes = [];
 
@@ -50,7 +48,7 @@
             $datum_timestamp = strtotime($result["datum_objednavky"]);
 
             if ($datum_timestamp !== false) {
-              $datum = date("d.m. H:i", $datum_timestamp);
+              $datum = date("d. m. Y, H:i", $datum_timestamp);
             }
           }
 
@@ -168,7 +166,7 @@
               <?= htmlspecialchars($datum, ENT_QUOTES, "UTF-8") ?>
             </td>
 
-            <td align="center">
+            <td>
               <?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?>
             </td>
 
@@ -188,13 +186,13 @@
             <td>
               <button
                 type="button"
-                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_vyskladnenie] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
+                class="status order-logs-open <?= htmlspecialchars($status_class, ENT_QUOTES, "UTF-8") ?>"
                 data-order-id="<?= (int) $result["id"] ?>"
                 data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
                 title="Zobraziť históriu objednávky"
                 nofocus
               >
-                <?= htmlspecialchars($status_labels[$status_vyskladnenie] ?? $status_vyskladnenie, ENT_QUOTES, "UTF-8") ?>
+                <?= htmlspecialchars($status_label, ENT_QUOTES, "UTF-8") ?>
               </button>
 
               <?php if (!empty($result["zmena"])) { ?>
@@ -207,23 +205,16 @@
               <?php } ?>
             </td>
 
-            <td>
-              <button
-                type="button"
-                class="status order-logs-open <?= htmlspecialchars($status_classes[$status_expedicia] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
-                data-order-id="<?= (int) $result["id"] ?>"
-                data-order-number="<?= htmlspecialchars((string) $result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>"
-                title="Zobraziť históriu objednávky"
-                nofocus
-              >
-                <?= htmlspecialchars($status_labels[$status_expedicia] ?? $status_expedicia, ENT_QUOTES, "UTF-8") ?>
-              </button>
-            </td>
-
-            <td>
-              <?php if ($status === "v_procese" && !empty($user_id)) { ?>
+            <td class="order-worker" data-order-worker-id="<?= (int) $result["id"] ?>">
+              <?php if ($working_user_name !== "" && $status === "v_procese") { ?>
                 <span class="working-user">
-                  User ID: <?= (int) $user_id ?>
+                  <?= $typ_kontroly === "vyskladnenie" ? "Vyskladňuje" : "Expeduje" ?>:
+                  <strong><?= htmlspecialchars($working_user_name, ENT_QUOTES, "UTF-8") ?></strong>
+                </span>
+              <?php } elseif ($working_user_name !== "" && $status === "ukoncene") { ?>
+                <span class="working-user working-user_done">
+                  <?= $typ_kontroly === "vyskladnenie" ? "Vyskladnil" : "Expedoval" ?>:
+                  <strong><?= htmlspecialchars($working_user_name, ENT_QUOTES, "UTF-8") ?></strong>
                 </span>
               <?php } else { ?>
                 <span class="table-empty">—</span>
@@ -246,8 +237,8 @@
       <?php } else { ?>
 
         <tr>
-          <td colspan="11" class="data-table_empty">
-            Nenašli sa žiadne faktúry.
+          <td colspan="10" class="data-table_empty">
+            Nenašli sa žiadne objednávky.
           </td>
         </tr>
 
