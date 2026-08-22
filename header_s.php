@@ -146,6 +146,14 @@ if ($page === "invoice") {
   ]);
 
   $items = $query->fetchAll(PDO::FETCH_ASSOC);
+  $query = $db->prepare("
+    SELECT id, kod, order_id
+    FROM expedicne_boxy
+    WHERE order_id IS NULL OR order_id = :order_id
+    ORDER BY kod ASC
+  ");
+  $query->execute([":order_id" => $order_id]);
+  $available_expedicne_boxy = $query->fetchAll(PDO::FETCH_ASSOC);
   $pocet_poloziek = 0;
 
   foreach ($items as $item) {

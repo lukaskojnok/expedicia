@@ -39,6 +39,40 @@ $(function() {
 });
 
 $(function() {
+  $(document).on("click", ".expedicny-box-release", function() {
+    const $button = $(this);
+
+    if (!window.confirm("Naozaj chcete manuálne uvoľniť tento expedičný box?")) {
+      return;
+    }
+
+    $button.prop("disabled", true).text("Uvoľňujem…");
+
+    $.ajax({
+      url: "/scripts/expedicny_box_release.php",
+      method: "POST",
+      dataType: "json",
+      data: {
+        box_id: $button.data("box-id"),
+        csrf_token: $("#expedicny-box-release-csrf").val()
+      }
+    }).done(function(response) {
+      if (response.success) {
+        window.location.reload();
+        return;
+      }
+
+      alert(response.message || "Box sa nepodarilo uvoľniť.");
+      $button.prop("disabled", false).text("Uvoľniť box");
+    }).fail(function(xhr) {
+      const response = xhr.responseJSON || {};
+      alert(response.message || "Box sa nepodarilo uvoľniť.");
+      $button.prop("disabled", false).text("Uvoľniť box");
+    });
+  });
+});
+
+$(function() {
   const $claimData = $("#work-claim-data");
   const $conflictModal = $("#work-conflict-modal");
   let claimInProgress = false;
@@ -208,6 +242,7 @@ $(function() {
     work_claimed: "Objednávku začal spracovávať používateľ",
     work_taken_over: "Objednávku prevzal iný používateľ",
     control_completed: "Kontrola objednávky dokončená",
+    quick_control_completed: "Rýchle spracovanie objednávky",
     carrier_sent: "Odoslanie zásielky dopravcovi"
   };
   const controlTypeLabels = {

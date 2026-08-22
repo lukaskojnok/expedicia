@@ -29,6 +29,7 @@
         <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
           <div class="topbar-dropdown_mode">Aktuálne: <strong class="black"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
           <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>" style="font-weight:bold">
+            <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>&nbsp;
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
           <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
@@ -261,7 +262,8 @@ if (empty($page)) { //form
           dataType: "json",
           data: {
             order_id: $("#shipment-form").data("order-id") || <?= (int) $order_id ?>,
-            typ_kontroly: "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>"
+            typ_kontroly: "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>",
+            quick: quickControl === "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>" ? 1 : 0
           }
         });
       }

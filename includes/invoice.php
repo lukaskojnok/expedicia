@@ -209,7 +209,13 @@ function getShoptetProductImageUrl($code, $token) {
       <strong>Objednávka je pripravená na expedíciu</strong>
       <a href="/?typ=vyskladnenie" class="shipment-back-button">Späť na objednávky</a>
     </div>
-  <?php } elseif (!empty(DOPRAVA_KODY[$order["doprava_kod"]]["api"])) { ?>
+  <?php } elseif (($shipping_data["api"] ?? "") === "osobne") { ?>
+    <div class="shipment-completed">
+      <strong>Kontrola expedície bola úspešne ukončená</strong>
+      <span>Objednávka je pripravená na osobný odber.</span>
+      <a href="/?typ=expedicia" class="shipment-back-button">Späť na objednávky</a>
+    </div>
+  <?php } elseif (!empty($shipping_data["api"])) { ?>
     <form class="shipment-form" id="shipment-form" data-order-id="<?= (int) $order["id"] ?>" data-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>" nofocus>
       <div class="shipment-layout">
         <div class="shipment-panel shipment-panel_weights">
