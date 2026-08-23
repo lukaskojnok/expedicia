@@ -7,7 +7,7 @@
       <div class="topbar_page">
         <h1>
           <span class="topbar_page-title-desktop"><?= htmlspecialchars($page_title, ENT_QUOTES, "UTF-8") ?></span>
-          <span class="topbar_page-title-mobile"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></span>
+          <span class="topbar_page-title-mobile"><?= htmlspecialchars($page === "pozicie-sklad" ? "Pozície skladu" : ($page === "expedicne-boxy" ? "Expedičné boxy" : ($typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia")), ENT_QUOTES, "UTF-8") ?></span>
         </h1>
 
         <?php if ($topbar_count_value !== "") { ?>
@@ -37,6 +37,7 @@
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
           <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
+          <a href="/?page=pozicie-sklad&typ=<?= urlencode($typ_kontroly) ?>">Pozície skladu</a>
           <a href="/scripts/update_invoices.php?auto=1">Aktualizovať objednávky</a>
           <a href="/logout.php">Odhlásiť sa</a>
         </div>
@@ -53,6 +54,8 @@
     require __DIR__ . "/includes/invoice.php";
   } elseif ($page === "expedicne-boxy") {
     require __DIR__ . "/includes/expedicne-boxy.php";
+  } elseif ($page === "pozicie-sklad") {
+    require __DIR__ . "/includes/pozicie-sklad.php";
   } else {
     require __DIR__ . "/includes/invoices.php";
   }
@@ -530,9 +533,11 @@ if (empty($page)) { //form
       });
 
       if (quickControl === "<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>") {
-        $(".invoice-item_amount_control").attr("item_amount", "0").text("0");
-        $("#invoice-items-box tbody tr").attr("hidden", "hidden");
-        showSuccessfulControl();
+        $(document).one("order-claim-success", function() {
+          $(".invoice-item_amount_control").attr("item_amount", "0").text("0");
+          $("#invoice-items-box tbody tr").attr("hidden", "hidden");
+          showSuccessfulControl();
+        });
       }
 
       if (!$shipmentForm.length) {

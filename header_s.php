@@ -113,24 +113,9 @@ if ($page === "invoice") {
   $control_user_id = (int) ($admin_data["id"] ?? 0);
 
   if ($control_user_id > 0) {
-    $query = $db->prepare("
-      UPDATE orders
-      SET
-        {$status_column} = CASE
-          WHEN {$status_column} = 'nove' THEN 'v_procese'
-          ELSE {$status_column}
-        END,
-        {$user_column} = :user_id
-      WHERE id = :id
-    ");
-    $query->execute([":user_id" => $control_user_id, ":id" => $order_id]);
-
     controls_add_log($db, $order_id, $control_user_id, $typ_kontroly, "invoice_opened", "opened", [
       "message" => "Otvorený detail objednávky."
     ]);
-
-    $order[$status_column] = $order[$status_column] === "nove" ? "v_procese" : $order[$status_column];
-    $order[$user_column] = $control_user_id;
   }
 
   $query = $db->prepare("
@@ -194,7 +179,82 @@ if ($page === "invoice") {
   $topbar_count_value = $order["cislo_objednavky"];
   $topbar_count_label = "objednávka";
   $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
-  
+
+} elseif ($page === "expedicne-boxy") {
+  $query = $db->query("
+    SELECT
+      expedicne_boxy.id,
+      expedicne_boxy.kod,
+      expedicne_boxy.order_id,
+      expedicne_boxy.obsadeny_at,
+      orders.cislo_objednavky,
+      orders.cislo_faktury,
+      orders.dodacie_meno,
+      orders.fakturacne_meno
+    FROM expedicne_boxy
+    LEFT JOIN orders ON orders.id = expedicne_boxy.order_id
+    ORDER BY expedicne_boxy.kod ASC
+  ");
+  $expedicne_boxy = $query->fetchAll(PDO::FETCH_ASSOC);
+
+  $page_title = "Expedičné boxy";
+  $topbar_count_value = count($expedicne_boxy);
+  $topbar_count_label = "boxov";
+  $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
+
+} elseif ($page === "pozicie-sklad") {
+  $pozicie_sklad_error = "";
+  $pozicie_sklad_saved = isset($_GET["saved"]) && $_GET["saved"] === "1";
+
+  if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $csrf_token = $_POST["csrf_token"] ?? "";
+
+    if (!auth_csrf_is_valid($csrf_token)) {
+      $pozicie_sklad_error = "Platnosť formulára vypršala. Obnovte stránku a skúste to znova.";
+    } else {
+      $pozicie_input = str_replace(["\r\n", "\r"], "\n", (string) ($_POST["pozicie"] ?? ""));
+      $pozicie_riadky = preg_split('/\n/', $pozicie_input);
+      $pozicie_riadky = array_values(array_filter(array_map("trim", $pozicie_riadky), function ($pozicia) {
+        return $pozicia !== "";
+      }));
+      $pozicie_text = implode("\r\n", $pozicie_riadky);
+
+      $query = $db->prepare("SELECT id FROM pozicie_sklad WHERE sklad = :sklad ORDER BY id ASC LIMIT 1");
+      $query->execute([":sklad" => 1]);
+      $pozicie_sklad_id = (int) $query->fetchColumn();
+
+      if ($pozicie_sklad_id > 0) {
+        $query = $db->prepare("UPDATE pozicie_sklad SET pozicie = :pozicie WHERE id = :id");
+        $query->execute([
+          ":pozicie" => $pozicie_text,
+          ":id" => $pozicie_sklad_id
+        ]);
+      } else {
+        $query = $db->prepare("INSERT INTO pozicie_sklad (sklad, pozicie) VALUES (:sklad, :pozicie)");
+        $query->execute([
+          ":sklad" => 1,
+          ":pozicie" => $pozicie_text
+        ]);
+      }
+
+      header("Location: /?page=pozicie-sklad&typ=" . urlencode($typ_kontroly) . "&saved=1");
+      exit;
+    }
+  }
+
+  $query = $db->prepare("SELECT pozicie FROM pozicie_sklad WHERE sklad = :sklad ORDER BY id ASC LIMIT 1");
+  $query->execute([":sklad" => 1]);
+  $pozicie_sklad_text = (string) ($query->fetchColumn() ?: "");
+  $pozicie_sklad_text = str_replace(["\r\n", "\r"], "\n", $pozicie_sklad_text);
+  $pozicie_sklad_count = count(array_filter(array_map("trim", preg_split('/\n/', $pozicie_sklad_text)), function ($pozicia) {
+    return $pozicia !== "";
+  }));
+
+  $page_title = "Pozície skladu";
+  $topbar_count_value = $pozicie_sklad_count;
+  $topbar_count_label = "pozícií";
+  $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
+
 } else {
   if ($typ_kontroly === "vyskladnenie") {
     $orders_where_sql = "orders.status_vyskladnenie IN ('nove', 'v_procese')";

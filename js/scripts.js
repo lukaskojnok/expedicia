@@ -113,6 +113,7 @@ $(function() {
     }).done(function(response) {
       if (response.success) {
         closeConflictModal();
+        $(document).trigger("order-claim-success", [response]);
       }
     }).fail(function(xhr) {
       const response = xhr.responseJSON || {};

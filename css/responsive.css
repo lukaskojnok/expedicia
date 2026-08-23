@@ -240,6 +240,15 @@
   .invoice-summary_item:nth-child(8) {
     border-bottom: 0;
   }
+  .invoice-summary_item:nth-child(9) {
+    grid-column: 1 / -1; min-height: 54px; padding: 0; border-right: 0; border-bottom: 0;
+  }
+  .invoice-summary_item:nth-child(9) .invoice-actions_toggle {
+    min-height: 54px; padding: 0;
+  }
+  .invoice-summary_item:nth-child(9) .invoice-actions_menu {
+    top: calc(100% + 4px); width: min(280px, calc(100vw - 20px));
+  }
   .invoice-summary_item .status {
     width: 100%; justify-content: center;
   }
