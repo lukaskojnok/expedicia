@@ -1,5 +1,5 @@
 <?php
-$shoptet_private_api_token = SHOPTET_HASH_ORDERS;
+$shoptet_private_api_token = SHOPTET_API;
 
 function getShoptetProductData($code, $token) {
   $url = "https://api.myshoptet.com/api/products/code/" . rawurlencode($code) . "?include=images,perStockAmounts";
@@ -46,6 +46,49 @@ function getShoptetProductData($code, $token) {
     "stock_claim" => $stock_data["claim"] ?? 0
   ];
 }
+
+$stock_positions_query = $db->prepare("SELECT pozicie FROM pozicie_sklad WHERE sklad = :sklad ORDER BY id ASC LIMIT 1");
+$stock_positions_query->execute([":sklad" => 1]);
+$stock_positions_text = (string) ($stock_positions_query->fetchColumn() ?: "");
+$stock_position_order = [];
+
+foreach (preg_split('/\R/u', $stock_positions_text) as $stock_position_index => $stock_position) {
+  $stock_position_key = strtoupper(trim($stock_position));
+
+  if ($stock_position_key !== "" && !array_key_exists($stock_position_key, $stock_position_order)) {
+    $stock_position_order[$stock_position_key] = $stock_position_index;
+  }
+}
+
+$product_api_cache = [];
+
+foreach ($items as $item_index => &$item) {
+  $product_code = trim((string) ($item["kod"] ?? ""));
+
+  if (!array_key_exists($product_code, $product_api_cache)) {
+    $product_api_cache[$product_code] = $product_code === ""
+      ? ["image" => "", "stock_location" => "", "stock_amount" => 0, "stock_claim" => 0]
+      : getShoptetProductData($product_code, $shoptet_private_api_token);
+  }
+
+  $item["_shoptet_data"] = $product_api_cache[$product_code];
+  $stock_location_key = strtoupper(trim((string) ($item["_shoptet_data"]["stock_location"] ?? "")));
+  $item["_stock_position_order"] = array_key_exists($stock_location_key, $stock_position_order)
+    ? $stock_position_order[$stock_location_key]
+    : PHP_INT_MAX;
+  $item["_original_order"] = $item_index;
+}
+unset($item);
+
+usort($items, function ($item_a, $item_b) {
+  $position_comparison = $item_a["_stock_position_order"] <=> $item_b["_stock_position_order"];
+
+  if ($position_comparison !== 0) {
+    return $position_comparison;
+  }
+
+  return $item_a["_original_order"] <=> $item_b["_original_order"];
+});
 ?>
 
 
@@ -133,6 +176,27 @@ function getShoptetProductData($code, $token) {
     <?php } ?>
   </div>
 
+  <div class="invoice-summary_item invoice-summary_actions" nofocus>
+    <button
+      type="button"
+      class="invoice-actions_toggle"
+      aria-expanded="false"
+      aria-controls="invoice-actions-menu"
+      aria-label="Otvoriť akcie objednávky"
+    >⋮</button>
+    <div class="invoice-actions_menu" id="invoice-actions-menu" hidden>
+      <a href="/invoice?id=<?= (int) $order["id"] ?>&amp;typ=vyskladnenie&amp;quick=vyskladnenie">Rýchle vyskladnenie</a>
+      <a href="/invoice?id=<?= (int) $order["id"] ?>&amp;typ=expedicia&amp;quick=expedicia">Rýchla expedícia</a>
+      <button
+        type="button"
+        class="invoice-action_delete"
+        data-order-delete
+        data-order-id="<?= (int) $order["id"] ?>"
+        data-csrf-token="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+      >Vymazať objednávku</button>
+    </div>
+  </div>
+
 </section>
 
 <div class="table-box" id="invoice-items-box">
@@ -154,7 +218,7 @@ function getShoptetProductData($code, $token) {
           $produkt_obrazok = "";
           $produkt_kod = trim((string) $item["kod"]);
 
-          $produkt_shoptet_api_data = getShoptetProductData($produkt_kod, $shoptet_private_api_token);
+          $produkt_shoptet_api_data = $item["_shoptet_data"] ?? [];
           $produkt_obrazok = $produkt_shoptet_api_data["image"] ?? "";
           $produkt_poloha = $produkt_shoptet_api_data["stock_location"] ?? "";
           ?>
