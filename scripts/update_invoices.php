@@ -498,3 +498,7 @@ try {
 
   echo "Chyba importu: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, "UTF-8");
 }
+
+if (isset($_GET["auto"]) && $_GET["auto"] === "1") {
+  echo "<meta http-equiv='refresh' content='0;url=/'>";
+}

@@ -1,6 +1,6 @@
 <div class="table-box">
 
-  <table class="data-table" data-workers-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
+  <table class="data-table invoices-table" data-workers-control-type="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
     <thead>
       <tr>
         <!-- <th>Číslo faktúry</th> -->

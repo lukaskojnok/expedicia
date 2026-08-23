@@ -5,7 +5,10 @@
       <a href="/" class="topbar_logo">Expedícia</a>
 
       <div class="topbar_page">
-        <h1><?= htmlspecialchars($page_title, ENT_QUOTES, "UTF-8") ?></h1>
+        <h1>
+          <span class="topbar_page-title-desktop"><?= htmlspecialchars($page_title, ENT_QUOTES, "UTF-8") ?></span>
+          <span class="topbar_page-title-mobile"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></span>
+        </h1>
 
         <?php if ($topbar_count_value !== "") { ?>
           <span class="topbar_count">
@@ -21,18 +24,20 @@
         <a href="<?= htmlspecialchars($topbar_back_url, ENT_QUOTES, "UTF-8") ?>" class="topbar_logout">Späť na zoznam</a>
       <?php } ?>
 
-      <span>Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></span>
+      <span class="topbar-user">Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></span>
       <div class="topbar-dropdown" nofocus>
         <button type="button" class="topbar-hamburger" aria-expanded="false" aria-controls="topbar-dropdown-menu" aria-label="Otvoriť menu">
           <span></span><span></span><span></span>
         </button>
         <div class="topbar-dropdown_menu" id="topbar-dropdown-menu" hidden>
+          <div class="topbar-dropdown_user">Prihlásený: <strong><?= htmlspecialchars($prihlaseny_meno, ENT_QUOTES, "UTF-8") ?></strong></div>
           <div class="topbar-dropdown_mode">Aktuálne: <strong class="black"><?= $typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia" ?></strong></div>
           <a href="/?typ=<?= $typ_kontroly === "vyskladnenie" ? "expedicia" : "vyskladnenie" ?>" style="font-weight:bold">
             <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>&nbsp;
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
           <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
+          <a href="/scripts/update_invoices.php?auto=1">Aktualizovať objednávky</a>
           <a href="/logout.php">Odhlásiť sa</a>
         </div>
       </div>

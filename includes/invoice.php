@@ -1,8 +1,8 @@
 <?php
-$shoptet_private_api_token = "";
+$shoptet_private_api_token = SHOPTET_HASH_ORDERS;
 
-function getShoptetProductImageUrl($code, $token) {
-  $url = "https://api.myshoptet.com/api/products/code/" . rawurlencode($code) . "?include=images";
+function getShoptetProductData($code, $token) {
+  $url = "https://api.myshoptet.com/api/products/code/" . rawurlencode($code) . "?include=images,perStockAmounts";
 
   $ch = curl_init($url);
 
@@ -16,18 +16,35 @@ function getShoptetProductImageUrl($code, $token) {
 
   $response = json_decode(curl_exec($ch), true);
 
-  curl_close($ch);
-
   $image = $response["data"]["images"][0]["seoName"] ?? "";
 
-  if ($image === "") {
-    return null;
+  $image_url = "";
+
+  if ($image !== "") {
+    $image_url = "https://cdn.myshoptet.com/usr/www.okfish.sk/user/shop/detail/" . $image;
   }
 
-  if (empty($image)) {
-    return null;
-  } else
-  return "https://cdn.myshoptet.com/usr/www.okfish.sk/user/shop/detail/" . $image;
+  $stock_data = null;
+
+  foreach ($response["data"]["variants"] ?? [] as $variant) {
+    if ((string) ($variant["code"] ?? "") !== (string) $code) {
+      continue;
+    }
+
+    foreach ($variant["perStockAmounts"] ?? [] as $stock) {
+      if ((int) ($stock["stockId"] ?? 0) === 1) {
+        $stock_data = $stock;
+        break 2;
+      }
+    }
+  }
+
+  return [
+    "image" => $image_url,
+    "stock_location" => $stock_data["location"] ?? "",
+    "stock_amount" => $stock_data["amount"] ?? 0,
+    "stock_claim" => $stock_data["claim"] ?? 0
+  ];
 }
 ?>
 
@@ -137,14 +154,16 @@ function getShoptetProductImageUrl($code, $token) {
           $produkt_obrazok = "";
           $produkt_kod = trim((string) $item["kod"]);
 
-          // $produkt_obrazok = getShoptetProductImageUrl($produkt_kod, $shoptet_private_api_token);
+          $produkt_shoptet_api_data = getShoptetProductData($produkt_kod, $shoptet_private_api_token);
+          $produkt_obrazok = $produkt_shoptet_api_data["image"] ?? "";
+          $produkt_poloha = $produkt_shoptet_api_data["stock_location"] ?? "";
           ?>
 
           <tr row_item_id="<?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?>">
             <td class="invoice-item_image">
-              <?php if (!empty($item["image"])) { ?>
+              <?php if ($produkt_obrazok !== "") { ?>
                 <img
-                  src="<?= htmlspecialchars($item["image"], ENT_QUOTES, "UTF-8"); ?>"
+                  src="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8"); ?>"
                   alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?>"
                 >
               <?php } ?>
@@ -159,6 +178,11 @@ function getShoptetProductImageUrl($code, $token) {
 
             <td class="invoice-item_name">
               <strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?></strong>
+              <?php if ($produkt_poloha !== "") { ?>
+                <small class="invoice-item_location">
+                  <strong><?= htmlspecialchars($produkt_poloha, ENT_QUOTES, "UTF-8"); ?></strong>
+                </small>
+              <?php } ?>
             </td>
 
             <td>
