@@ -297,7 +297,6 @@ usort($items, function ($item_a, $item_b) {
   <?php } elseif (($shipping_data["api"] ?? "") === "osobne") { ?>
     <div class="shipment-completed">
       <strong>Kontrola expedície bola úspešne ukončená</strong>
-      <span>Objednávka je pripravená na osobný odber.</span>
       <a href="/?typ=expedicia" class="shipment-back-button">Späť na objednávky</a>
     </div>
   <?php } elseif (!empty($shipping_data["api"])) { ?>
