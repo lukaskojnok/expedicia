@@ -398,7 +398,7 @@ body.work-conflict-modal-open {
   width: 45%;
 }
 .invoice-item_location {
-  display: block; width: fit-content; margin: 8px 0 0; padding: 5px 9px; font-size: 13px; line-height: 1.3; font-weight: 600; color: #174f96; background: #deebff; border-left: 4px solid #246bfe;
+  display: block; width: fit-content; margin: 8px 0 0; padding: 5px 9px; font-size: 13px; line-height: 1.3; font-weight: 600; color: #174f96; background: #deebff;
 }
 .data-table .invoice-item_location strong {
   color: inherit;

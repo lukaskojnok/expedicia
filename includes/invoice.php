@@ -242,15 +242,12 @@ usort($items, function ($item_a, $item_b) {
 
             <td class="invoice-item_name">
               <strong><?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?></strong>
+              <?= !empty($item["variant_nazov"]) ? "<br>" . htmlspecialchars($item["variant_nazov"], ENT_QUOTES, "UTF-8") : ""; ?>
               <?php if ($produkt_poloha !== "") { ?>
                 <small class="invoice-item_location">
                   <strong><?= htmlspecialchars($produkt_poloha, ENT_QUOTES, "UTF-8"); ?></strong>
                 </small>
               <?php } ?>
-            </td>
-
-            <td>
-              <?= !empty($item["variant"]) ? htmlspecialchars($item["variant"], ENT_QUOTES, "UTF-8") : "—"; ?>
             </td>
 
             <td class="invoice-item_amount">
