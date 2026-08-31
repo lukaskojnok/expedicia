@@ -202,6 +202,39 @@ if ($page === "invoice") {
   $topbar_count_label = "boxov";
   $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
 
+} elseif ($page === "order-updates") {
+  $today = new DateTimeImmutable("today");
+  $order_update_presets = [
+    "today" => [
+      "label" => "Od dnes",
+      "date" => $today->format("d. m. Y")
+    ],
+    "yesterday" => [
+      "label" => "Od včera",
+      "date" => $today->modify("-1 day")->format("d. m. Y")
+    ],
+    "last_7_days" => [
+      "label" => "Posledných 7 dní",
+      "date" => $today->modify("-6 days")->format("d. m. Y")
+    ]
+  ];
+
+  $query = $db->query("
+    SELECT
+      order_update_logs.*,
+      admins.name AS admin_name
+    FROM order_update_logs
+    LEFT JOIN admins ON admins.id = order_update_logs.admin_id
+    ORDER BY order_update_logs.started_at DESC, order_update_logs.id DESC
+    LIMIT 200
+  ");
+  $order_update_logs = $query->fetchAll(PDO::FETCH_ASSOC);
+
+  $page_title = "Aktualizácie objednávok";
+  $topbar_count_value = count($order_update_logs);
+  $topbar_count_label = "záznamov";
+  $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
+
 } elseif ($page === "pozicie-sklad") {
   $pozicie_sklad_error = "";
   $pozicie_sklad_saved = isset($_GET["saved"]) && $_GET["saved"] === "1";

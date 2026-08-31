@@ -28,7 +28,6 @@ function auth_login($db, $admin) {
   $_SESSION["admin_id"] = (int) $admin["id"];
   $_SESSION["admin_login"] = (string) $admin["login"];
   $_SESSION["admin_name"] = (string) ($admin["name"] ?: $admin["login"]);
-  $_SESSION["admin_last_activity"] = time();
   $session_id = session_id();
   $user_agent = substr((string) ($_SERVER["HTTP_USER_AGENT"] ?? ""), 0, 255);
   $ip = substr((string) ($_SERVER["REMOTE_ADDR"] ?? ""), 0, 100);
@@ -37,35 +36,6 @@ function auth_login($db, $admin) {
   $db->prepare("UPDATE admins SET date_login_last = NOW() WHERE id = :id")->execute([":id" => (int) $admin["id"]]);
   $query = $db->prepare("INSERT INTO admins_logs SET login = :login, session_id = :session_id, user_agent = :user_agent, ip = :ip, unique_code = :unique_code, date_login = NOW(), date_last_do = NOW()");
   $query->execute([":login" => $admin["login"], ":session_id" => $session_id, ":user_agent" => $user_agent, ":ip" => $ip, ":unique_code" => $unique_code]);
-}
-function auth_refresh_session($db) {
-  if (!auth_is_logged_in()) {
-    return false;
-  }
-
-  $now = time();
-  $last_activity = (int) ($_SESSION["admin_last_activity"] ?? $now);
-
-  if ($now - $last_activity > AUTH_SESSION_LIFETIME) {
-    auth_logout($db);
-    return false;
-  }
-
-  $_SESSION["admin_last_activity"] = $now;
-
-  if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), session_id(), [
-      "expires" => $now + AUTH_SESSION_LIFETIME,
-      "path" => $params["path"],
-      "domain" => $params["domain"],
-      "secure" => (bool) $params["secure"],
-      "httponly" => (bool) $params["httponly"],
-      "samesite" => $params["samesite"] ?? "Lax"
-    ]);
-  }
-
-  return true;
 }
 function auth_logout($db) {
   $unique_code = (string) ($_SESSION["admin_unique_code"] ?? "");

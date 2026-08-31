@@ -3,7 +3,8 @@ ini_set("display_errors", "0");
 require_once __DIR__ . "/config/common.php";
 
 if (auth_is_logged_in()) {
-  header("Location: /");
+  $logged_admin = auth_admin_by_id($db, $_SESSION["admin_id"]);
+  header("Location: " . auth_primary_url($logged_admin));
   exit;
 }
 
@@ -41,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       if ($admin) {
         auth_login($db, $admin);
 
-        header("Location: /");
+        header("Location: " . auth_primary_url($admin));
         exit;
       }
 
@@ -58,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       if ($admin && auth_password_matches($admin, $password)) {
         auth_login($db, $admin);
 
-        header("Location: /");
+        header("Location: " . auth_primary_url($admin));
         exit;
       }
 

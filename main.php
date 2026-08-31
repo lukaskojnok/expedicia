@@ -7,7 +7,7 @@
       <div class="topbar_page">
         <h1>
           <span class="topbar_page-title-desktop"><?= htmlspecialchars($page_title, ENT_QUOTES, "UTF-8") ?></span>
-          <span class="topbar_page-title-mobile"><?= htmlspecialchars($page === "pozicie-sklad" ? "Pozície skladu" : ($page === "expedicne-boxy" ? "Expedičné boxy" : ($typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia")), ENT_QUOTES, "UTF-8") ?></span>
+          <span class="topbar_page-title-mobile"><?= htmlspecialchars($page === "pozicie-sklad" ? "Pozície skladu" : ($page === "expedicne-boxy" ? "Expedičné boxy" : ($page === "order-updates" ? "Aktualizácie" : ($typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia"))), ENT_QUOTES, "UTF-8") ?></span>
         </h1>
 
         <?php if ($topbar_count_value !== "") { ?>
@@ -38,7 +38,15 @@
           </a>
           <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
           <a href="/?page=pozicie-sklad&typ=<?= urlencode($typ_kontroly) ?>">Pozície skladu</a>
-          <a href="/scripts/update_invoices.php?auto=1">Aktualizovať objednávky</a>
+          <div class="topbar-update-actions">
+            <form method="post" action="/scripts/update_invoices.php">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+              <input type="hidden" name="request_type" value="quick">
+              <input type="hidden" name="return_to" value="home">
+              <button type="submit">Aktualizovať objednávky</button>
+            </form>
+            <a href="/?page=order-updates&amp;typ=<?= urlencode($typ_kontroly) ?>" aria-label="Možnosti a história aktualizácií" title="Možnosti a história aktualizácií">•••</a>
+          </div>
           <a href="/logout.php">Odhlásiť sa</a>
         </div>
       </div>
@@ -56,6 +64,8 @@
     require __DIR__ . "/includes/expedicne-boxy.php";
   } elseif ($page === "pozicie-sklad") {
     require __DIR__ . "/includes/pozicie-sklad.php";
+  } elseif ($page === "order-updates") {
+    require __DIR__ . "/includes/order-updates.php";
   } else {
     require __DIR__ . "/includes/invoices.php";
   }

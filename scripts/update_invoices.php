@@ -1,30 +1,168 @@
 <?php
-// https://diligent-pink-lynx.kojnok.sk/scripts/update_invoices.php
+// Cron cez CLI: php scripts/update_invoices.php
+// Cron cez URL: /scripts/update_invoices.php?cron=1&cron_key=HODNOTA_Z_UPDATE_ORDERS_CRON_KEY
 
-ini_set("display_errors", 1);
-ini_set("display_startup_errors", 1);
+// php /cesta/k/webu/scripts/update_invoices.php
+
+ini_set("display_errors", 0);
+ini_set("display_startup_errors", 0);
 error_reporting(E_ALL);
+date_default_timezone_set("Europe/Bratislava");
+
+$is_cli = PHP_SAPI === "cli";
+
+if ($is_cli) {
+  $_SERVER["DOCUMENT_ROOT"] = dirname(__DIR__);
+  $_SERVER["REMOTE_ADDR"] = "127.0.0.1";
+  $_SERVER["HTTP_USER_AGENT"] = "Expedicia cron";
+  $_SERVER["REQUEST_SCHEME"] = "http";
+  $_SERVER["HTTP_HOST"] = "localhost";
+  $_SERVER["REQUEST_URI"] = "/scripts/update_invoices.php";
+  $_SERVER["GEOIP_COUNTRY_CODE"] = "";
+}
 
 require_once __DIR__ . "/../config/common.php";
 
-$zdroj = "shoptet";
-$zdroj_eshop = "okfish.sk";
+function update_fail_response(string $message, int $http_code = 400): void {
+  if (PHP_SAPI !== "cli") {
+    http_response_code($http_code);
+  }
 
-$shoptet_orders_hash = SHOPTET_HASH_ORDERS;
-
-$update_time_from = "18.08.2026 08:00:00";
-
-$date = DateTime::createFromFormat("d.m.Y H:i:s", $update_time_from);
-
-if ($date === false) {
-  exit("Nesprávny formát dátumu.");
+  echo PHP_SAPI === "cli"
+    ? $message . PHP_EOL
+    : htmlspecialchars($message, ENT_QUOTES, "UTF-8");
+  exit(1);
 }
 
-$update_time_from_url = rawurlencode($date->format("Y-m-d H:i:s"));
+function update_parse_date(string $value, bool $date_only = false): ?DateTimeImmutable {
+  $format = $date_only ? "!Y-m-d" : "!Y-m-d H:i:s";
+  $date = DateTimeImmutable::createFromFormat($format, $value);
+  $errors = DateTimeImmutable::getLastErrors();
 
+  if ($date === false || ($errors !== false && ($errors["warning_count"] > 0 || $errors["error_count"] > 0))) {
+    return null;
+  }
+
+  return $date;
+}
+
+function update_finish_log(PDO $db, int $log_id, string $status, int $new_orders, int $changed_orders, int $unchanged_orders, ?string $message = null): void {
+  $query = $db->prepare("
+    UPDATE order_update_logs SET
+      status = :status,
+      finished_at = NOW(),
+      new_orders = :new_orders,
+      changed_orders = :changed_orders,
+      unchanged_orders = :unchanged_orders,
+      message = :message
+    WHERE id = :id
+    LIMIT 1
+  ");
+  $query->execute([
+    ":status" => $status,
+    ":new_orders" => $new_orders,
+    ":changed_orders" => $changed_orders,
+    ":unchanged_orders" => $unchanged_orders,
+    ":message" => $message,
+    ":id" => $log_id
+  ]);
+}
+
+$cron_requested = !$is_cli && isset($_GET["cron"]) && $_GET["cron"] === "1";
+$cron_key = (string) ($_GET["cron_key"] ?? "");
+$configured_cron_key = defined("UPDATE_ORDERS_CRON_KEY") ? (string) UPDATE_ORDERS_CRON_KEY : "";
+$is_http_cron = $cron_requested
+  && $configured_cron_key !== ""
+  && $cron_key !== ""
+  && hash_equals($configured_cron_key, $cron_key);
+
+if ($cron_requested && !$is_http_cron) {
+  update_fail_response("Cron kľúč nie je nastavený alebo nie je platný.", 403);
+}
+
+$is_cron = $is_cli || $is_http_cron;
+
+if (!$is_cron) {
+  if (!auth_is_logged_in()) {
+    header("Location: /login.php");
+    exit;
+  }
+
+  if (($_SERVER["REQUEST_METHOD"] ?? "GET") !== "POST") {
+    update_fail_response("Aktualizáciu je možné spustiť iba odoslaním formulára.", 405);
+  }
+
+  if (!auth_csrf_is_valid($_POST["csrf_token"] ?? "")) {
+    update_fail_response("Platnosť formulára vypršala. Obnovte stránku a skúste to znova.", 403);
+  }
+}
+
+$zdroj = "shoptet";
+$zdroj_eshop = "okfish.sk";
+$shoptet_orders_hash = SHOPTET_HASH_ORDERS;
+$source = $is_cron ? "cron" : "manual";
+$request_data = $is_cron ? $_GET : $_POST;
+$request_type = (string) ($request_data["request_type"] ?? "quick");
+$allowed_request_types = ["quick", "today", "yesterday", "last_7_days", "custom"];
+
+if (!in_array($request_type, $allowed_request_types, true)) {
+  update_fail_response("Neznámy typ aktualizácie.");
+}
+
+$today = new DateTimeImmutable("today");
+
+if ($request_type === "quick") {
+  $query = $db->query("
+    SELECT started_at
+    FROM order_update_logs
+    WHERE status = 'success'
+    ORDER BY started_at DESC, id DESC
+    LIMIT 1
+  ");
+  $last_successful_update = $query->fetchColumn();
+  $date = $last_successful_update
+    ? update_parse_date((string) $last_successful_update)
+    : $today;
+} elseif ($request_type === "today") {
+  $date = $today;
+} elseif ($request_type === "yesterday") {
+  $date = $today->modify("-1 day");
+} elseif ($request_type === "last_7_days") {
+  $date = $today->modify("-6 days");
+} else {
+  $date = update_parse_date((string) ($request_data["date_from"] ?? ""), true);
+}
+
+if (!$date || $date > new DateTimeImmutable()) {
+  update_fail_response("Zadajte platný dátum, ktorý nie je v budúcnosti.");
+}
+
+$update_time_from = $date->format("Y-m-d H:i:s");
+$update_time_from_url = rawurlencode($update_time_from);
 $url = "https://www.okfish.sk/export/ordersFeed.xml?patternId=53&partnerId=4&hash={$shoptet_orders_hash}&updateTimeFrom={$update_time_from_url}";
+$admin_id = $is_cron ? null : (int) ($_SESSION["admin_id"] ?? 0);
+$return_to = (!$is_cron && ($request_data["return_to"] ?? "") === "updates") ? "updates" : "home";
 
-echo "<a href='$url' target='_blank'>Načítať XML feed</a><br><br>";
+try {
+  $query = $db->prepare("
+    INSERT INTO order_update_logs SET
+      source = :source,
+      request_type = :request_type,
+      status = 'running',
+      admin_id = :admin_id,
+      update_from = :update_from,
+      started_at = NOW()
+  ");
+  $query->execute([
+    ":source" => $source,
+    ":request_type" => $request_type,
+    ":admin_id" => $admin_id ?: null,
+    ":update_from" => $update_time_from
+  ]);
+  $update_log_id = (int) $db->lastInsertId();
+} catch (Throwable $e) {
+  update_fail_response("Najprv vytvorte databázovú tabuľku order_update_logs. " . $e->getMessage(), 500);
+}
 
 function xml_text($value): string {
   return trim((string) $value);
@@ -48,47 +186,51 @@ function xml_decimal($value, int $decimal_places = 2): string {
   return number_format((float) $value, $decimal_places, ".", "");
 }
 
-$ch = curl_init($url);
+try {
+  $pocet_novych = 0;
+  $pocet_zmenenych = 0;
+  $pocet_bez_zmeny = 0;
+  $ch = curl_init($url);
 
-curl_setopt_array($ch, [
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_FOLLOWLOCATION => true,
-  CURLOPT_CONNECTTIMEOUT => 10,
-  CURLOPT_TIMEOUT => 60,
-  CURLOPT_SSL_VERIFYPEER => true,
-  CURLOPT_HTTPHEADER => [
-    "Accept: application/xml"
-  ]
-]);
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_TIMEOUT => 60,
+    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_HTTPHEADER => [
+      "Accept: application/xml"
+    ]
+  ]);
 
-$xml_content = curl_exec($ch);
-$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curl_error = curl_error($ch);
+  $xml_content = curl_exec($ch);
+  $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curl_error = curl_error($ch);
 
-curl_close($ch);
+  curl_close($ch);
 
-if ($xml_content === false || $http_code !== 200) {
-  exit("Feed sa nepodarilo načítať. HTTP: {$http_code}. Chyba: {$curl_error}");
-}
-
-libxml_use_internal_errors(true);
-
-$xml = simplexml_load_string($xml_content);
-
-if ($xml === false) {
-  $errors = libxml_get_errors();
-  $error_messages = [];
-
-  foreach ($errors as $error) {
-    $error_messages[] = trim($error->message);
+  if ($xml_content === false || $http_code !== 200) {
+    throw new RuntimeException("Feed sa nepodarilo načítať. HTTP: {$http_code}. Chyba: {$curl_error}");
   }
 
-  libxml_clear_errors();
+  libxml_use_internal_errors(true);
 
-  exit("XML sa nepodarilo spracovať: " . implode(" | ", $error_messages));
-}
+  $xml = simplexml_load_string($xml_content);
 
-$query_item_insert = $db->prepare("
+  if ($xml === false) {
+    $errors = libxml_get_errors();
+    $error_messages = [];
+
+    foreach ($errors as $error) {
+      $error_messages[] = trim($error->message);
+    }
+
+    libxml_clear_errors();
+
+    throw new RuntimeException("XML sa nepodarilo spracovať: " . implode(" | ", $error_messages));
+  }
+
+  $query_item_insert = $db->prepare("
   INSERT INTO orders_items SET
     order_id = :order_id,
     type = :type,
@@ -116,11 +258,6 @@ $query_item_insert = $db->prepare("
     celkova_dph = :celkova_dph
 ");
 
-$pocet_novych = 0;
-$pocet_zmenenych = 0;
-$pocet_bez_zmeny = 0;
-
-try {
   $db->beginTransaction();
 
   foreach ($xml->ORDER as $order) {
@@ -484,21 +621,41 @@ try {
   }
 
   $db->commit();
+  $success_message = "Aktualizácia dokončená. Nové: {$pocet_novych}, zmenené: {$pocet_zmenenych}, bez zmeny: {$pocet_bez_zmeny}.";
+  update_finish_log($db, $update_log_id, "success", $pocet_novych, $pocet_zmenenych, $pocet_bez_zmeny, $success_message);
 
-  echo "Import dokončený.<br>";
-  echo "Nové objednávky: {$pocet_novych}<br>";
-  echo "Zmenené objednávky: {$pocet_zmenenych}<br>";
-  echo "Bez zmeny: {$pocet_bez_zmeny}<br>";
+  if ($is_cron) {
+    echo $success_message . PHP_EOL;
+    exit(0);
+  }
+
+  $_SESSION["order_update_flash"] = [
+    "success" => true,
+    "message" => $success_message
+  ];
+  header("Location: " . ($return_to === "updates" ? "/?page=order-updates" : "/"));
+  exit;
 } catch (Throwable $e) {
   if ($db->inTransaction()) {
     $db->rollBack();
   }
 
-  http_response_code(500);
+  $error_message = "Chyba aktualizácie: " . $e->getMessage();
 
-  echo "Chyba importu: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, "UTF-8");
-}
+  try {
+    update_finish_log($db, $update_log_id, "error", $pocet_novych ?? 0, $pocet_zmenenych ?? 0, $pocet_bez_zmeny ?? 0, $error_message);
+  } catch (Throwable $log_error) {
+    $error_message .= " Log chyby sa nepodarilo uložiť: " . $log_error->getMessage();
+  }
 
-if (isset($_GET["auto"]) && $_GET["auto"] === "1") {
-  echo "<meta http-equiv='refresh' content='0;url=/'>";
+  if ($is_cron) {
+    update_fail_response($error_message, 500);
+  }
+
+  $_SESSION["order_update_flash"] = [
+    "success" => false,
+    "message" => $error_message
+  ];
+  header("Location: /?page=order-updates");
+  exit;
 }

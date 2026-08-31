@@ -138,6 +138,21 @@
   .content-main {
     padding: 10px;
   }
+  .topbar-update-actions button, .topbar-update-actions a {
+    font-size: 14px;
+  }
+  .order-update-actions {
+    padding: 18px 14px;
+  }
+  .order-update-presets, .order-update-custom-form {
+    flex-direction: column; align-items: stretch;
+  }
+  .order-update-presets form, .order-update-presets .button, .order-update-custom-form input[type="date"], .order-update-custom-form .button {
+    width: 100%;
+  }
+  .order-update-custom-form label {
+    align-self: flex-start;
+  }
   .table-box {
     border: 0; background: transparent;
   }
