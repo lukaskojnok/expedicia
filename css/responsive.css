@@ -1,0 +1,495 @@
+.topbar_page-title-mobile, .topbar-dropdown_user {
+  display: none;
+}
+
+@media (max-width: 1600px) {
+  .content-main {
+    padding: 18px;
+  }
+  .data-table th {
+    padding-right: 14px; padding-left: 14px;
+  }
+  .data-table td {
+    padding-right: 14px; padding-left: 14px;
+  }
+  .data-table_shipping {
+    min-width: 220px;
+  }
+  .invoice-summary_item {
+    padding-right: 14px; padding-left: 14px;
+  }
+  .shipment-layout {
+    grid-template-columns: minmax(520px, 1fr) 440px; gap: 28px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .data-table th {
+    padding-right: 10px; padding-left: 10px; font-size: 11px;
+  }
+  .data-table td {
+    padding-right: 10px; padding-left: 10px; font-size: 13px;
+  }
+  .data-table_shipping {
+    min-width: 190px;
+  }
+  .status, .working-user {
+    padding: 7px 9px; font-size: 12px;
+  }
+  .invoice-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .invoice-summary_item {
+    min-height: 76px; border-bottom: 1px solid #e2e6ec;
+  }
+  .invoice-summary_item:nth-child(4n) {
+    border-right: 0;
+  }
+  .invoice-summary_item:nth-last-child(-n + 4) {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .topbar_inner {
+    padding: 0 16px;
+  }
+  .topbar_logo {
+    padding-right: 18px;
+  }
+  .topbar_page {
+    gap: 14px; padding-left: 18px;
+  }
+  .topbar_menu {
+    gap: 14px;
+  }
+  .content-main {
+    padding: 14px;
+  }
+  .invoices-table th:nth-child(2), .invoices-table td:nth-child(2), .invoices-table th:nth-child(5), .invoices-table td:nth-child(5) {
+    display: none;
+  }
+  .invoices-table .data-table_shipping {
+    min-width: 210px;
+  }
+  .shipment-layout {
+    grid-template-columns: minmax(0, 1fr); gap: 24px;
+  }
+  .shipment-panel_keypad {
+    position: static; width: 100%; max-width: 680px; margin: 0 auto;
+  }
+  .shipment-keypad button {
+    height: 90px;
+  }
+  .order-logs-modal {
+    padding: 20px;
+  }
+  .order-logs-modal_dialog {
+    max-height: calc(100vh - 40px);
+  }
+}
+
+@media (max-width: 800px) {
+  body {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom)); font-size: 14px;
+  }
+  .topbar {
+    height: 60px;
+  }
+  .topbar_inner {
+    padding: 0 10px 0 14px;
+  }
+  .topbar_logo, .topbar_count, .topbar-user {
+    display: none;
+  }
+  .topbar_left, .topbar_page {
+    min-width: 0; height: 100%; padding: 0; border: 0;
+  }
+  .topbar_page-title-desktop {
+    display: none;
+  }
+  .topbar_page-title-mobile, .topbar-dropdown_user {
+    display: block;
+  }
+  .topbar_page h1 {
+    font-size: 19px;
+  }
+  .topbar_menu {
+    gap: 8px;
+  }
+  .topbar_logout {
+    height: 42px; padding: 0 12px; font-size: 12px;
+  }
+  .topbar-hamburger {
+    width: 48px; height: 42px;
+  }
+  .topbar-dropdown_menu {
+    top: 49px; right: 0; width: min(310px, calc(100vw - 20px));
+  }
+  .topbar-dropdown_menu a, .topbar-dropdown_mode, .topbar-dropdown_user {
+    display: block; padding: 16px 18px; font-size: 14px; color: #273044; border-bottom: 1px solid #e4e8ee;
+  }
+  .topbar-dropdown_user {
+    color: #657084; background: #f8fafc;
+  }
+  .topbar-dropdown_user strong {
+    color: #172033;
+  }
+  .content-main {
+    padding: 10px;
+  }
+  .topbar-update-actions button, .topbar-update-actions a {
+    font-size: 14px;
+  }
+  .order-update-actions {
+    padding: 18px 14px;
+  }
+  .order-update-presets, .order-update-custom-form {
+    flex-direction: column; align-items: stretch;
+  }
+  .order-update-presets form, .order-update-presets .button, .order-update-custom-form input[type="date"], .order-update-custom-form .button {
+    width: 100%;
+  }
+  .order-update-custom-form label {
+    align-self: flex-start;
+  }
+  .table-box {
+    border: 0; background: transparent;
+  }
+  .invoices-table, .invoices-table tbody, .invoices-table tr, .invoices-table td {
+    display: block; width: 100%;
+  }
+  .invoices-table thead {
+    display: none;
+  }
+  .invoices-table tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin: 0 0 10px; background: #fff; border: 1px solid #dce1e8; border-left: 5px solid #8791a1; box-shadow: 0 2px 7px rgba(23, 32, 51, .07);
+  }
+  .invoices-table tr.row-changed {
+    border-left-color: #e5a800;
+  }
+  .invoices-table td {
+    min-width: 0; height: auto; min-height: 64px; padding: 11px 12px; background: transparent; border-right: 1px solid #e7eaf0; border-bottom: 1px solid #e7eaf0;
+  }
+  .invoices-table tbody tr:hover td {
+    background: transparent;
+  }
+  .invoices-table td::before {
+    display: block; margin: 0 0 5px; font-size: 9px; line-height: 1.2; font-weight: 800; text-transform: uppercase; letter-spacing: .45px; color: #8791a1;
+  }
+  .invoices-table td:nth-child(1)::before {
+    content: "Objednávka";
+  }
+  .invoices-table td:nth-child(3)::before {
+    content: "Zákazník";
+  }
+  .invoices-table td:nth-child(4)::before {
+    content: "Doprava";
+  }
+  .invoices-table td:nth-child(6)::before {
+    content: "Položky";
+  }
+  .invoices-table td:nth-child(7)::before {
+    content: "Suma";
+  }
+  .invoices-table td:nth-child(8)::before {
+    content: "Vyskladnenie";
+  }
+  .invoices-table td:nth-child(9)::before {
+    content: "Expedícia";
+  }
+  .invoices-table td:nth-child(10)::before {
+    content: "Pracuje";
+  }
+  .invoices-table th:nth-child(2), .invoices-table td:nth-child(2), .invoices-table th:nth-child(5), .invoices-table td:nth-child(5) {
+    display: none;
+  }
+  .invoices-table td:nth-child(1), .invoices-table td:nth-child(3) {
+    grid-column: span 1;
+  }
+  .invoices-table td:nth-child(4), .invoices-table td:nth-child(10) {
+    grid-column: 1 / -1; border-right: 0;
+  }
+  .invoices-table td:nth-child(6), .invoices-table td:nth-child(8) {
+    border-right: 1px solid #e7eaf0;
+  }
+  .invoices-table td:nth-child(3), .invoices-table td:nth-child(7), .invoices-table td:nth-child(9) {
+    border-right: 0;
+  }
+  .invoices-table td:nth-child(8), .invoices-table td:nth-child(9), .invoices-table td:nth-child(10) {
+    border-bottom: 0;
+  }
+  .invoices-table td.data-table_shipping {
+    width: 100%; max-width: none; min-width: 0; padding-left: 14px; border-left-width: 5px !important;
+  }
+  .invoices-table .data-table_price {
+    text-align: left;
+  }
+  .invoices-table .status, .invoices-table .working-user {
+    width: 100%; min-height: 40px; justify-content: center; text-align: center;
+  }
+  .invoices-table .payment-info_warning {
+    padding: 4px 6px;
+  }
+  .invoices-table .data-table_empty {
+    display: block; grid-column: 1 / -1; padding: 35px 15px; border: 0;
+  }
+  .invoice-summary {
+    position: static; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-bottom: 10px; box-shadow: none;
+  }
+  .invoice-summary_item {
+    min-width: 0; min-height: 68px; padding: 10px 12px; border-right: 1px solid #e2e6ec; border-bottom: 1px solid #e2e6ec;
+  }
+  .invoice-summary_item:nth-child(2n) {
+    border-right: 0;
+  }
+  .invoice-summary_item:nth-child(3), .invoice-summary_item:nth-child(4) {
+    display: none;
+  }
+  .invoice-summary_item:nth-child(5), .invoice-summary_item:nth-child(8) {
+    grid-column: 1 / -1; border-right: 0;
+  }
+  .invoice-summary_item:nth-child(5), .invoice-summary_item:nth-child(6), .invoice-summary_item:nth-child(7) {
+    border-bottom: 1px solid #e2e6ec;
+  }
+  .invoice-summary_item:nth-child(8) {
+    border-bottom: 0;
+  }
+  .invoice-summary_item:nth-child(9) {
+    grid-column: 1 / -1; min-height: 54px; padding: 0; border-right: 0; border-bottom: 0;
+  }
+  .invoice-summary_item:nth-child(9) .invoice-actions_toggle {
+    min-height: 54px; padding: 0;
+  }
+  .invoice-summary_item:nth-child(9) .invoice-actions_menu {
+    top: calc(100% + 4px); width: min(280px, calc(100vw - 20px));
+  }
+  .invoice-summary_item .status {
+    width: 100%; justify-content: center;
+  }
+  .invoice-summary_shipping {
+    min-height: 76px; padding-left: 14px;
+  }
+  .invoice-items-table, .invoice-items-table tbody {
+    display: block; width: 100%;
+  }
+  .invoice-items-table tr {
+    display: grid; grid-template-columns: 74px minmax(0, 1fr) 68px; grid-template-rows: auto auto auto; width: 100%; min-height: 112px; margin: 0 0 10px; background: #fff; border: 1px solid #dce1e8;
+  }
+  .invoice-items-table tr[hidden] {
+    display: none !important;
+  }
+  .invoice-items-table td {
+    width: auto; min-width: 0; height: auto; padding: 8px 10px; border: 0;
+  }
+  .invoice-items-table .invoice-item_image {
+    grid-column: 1; grid-row: 1 / 4; width: auto; padding: 8px !important; border-right: 1px solid #e2e6ec;
+  }
+  .invoice-items-table .invoice-item_image img {
+    width: 58px; height: 74px;
+  }
+  .invoice-items-table .invoice-item_code {
+    grid-column: 2; grid-row: 1; justify-content: flex-start; min-height: auto !important; padding: 7px 10px !important; text-align: left;
+  }
+  .invoice-items-table .invoice-item_name {
+    grid-column: 2; grid-row: 2; width: auto; padding-bottom: 3px; font-size: 13px; line-height: 1.3;
+  }
+  .invoice-items-table td:nth-child(4) {
+    grid-column: 2; grid-row: 3; padding-top: 2px; font-size: 11px; color: #8791a1;
+  }
+  .invoice-items-table .invoice-item_amount {
+    display: none;
+  }
+  .invoice-items-table .invoice-item_amount_control {
+    grid-column: 3; grid-row: 1 / 4; justify-content: center; width: auto; min-width: 0; padding: 8px !important; font-size: 26px !important; border-left: 1px solid #dce1e8;
+  }
+  .invoice-items-table .data-table_empty {
+    grid-column: 1 / -1; justify-content: center; min-height: 100px;
+  }
+  .expedicne-boxy-table, .expedicne-boxy-table tbody, .expedicne-boxy-table tr, .expedicne-boxy-table td {
+    display: block; width: 100%;
+  }
+  .expedicne-boxy-table thead {
+    display: none;
+  }
+  .expedicne-boxy-table tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin: 0 0 10px; background: #fff; border: 1px solid #dce1e8;
+  }
+  .expedicne-boxy-table td {
+    height: auto; min-height: 58px; padding: 10px 12px; border-right: 1px solid #e7eaf0; border-bottom: 1px solid #e7eaf0;
+  }
+  .expedicne-boxy-table td::before {
+    display: block; margin: 0 0 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #8791a1;
+  }
+  .expedicne-boxy-table td:nth-child(1)::before {
+    content: "Expedičný box";
+  }
+  .expedicne-boxy-table td:nth-child(2)::before {
+    content: "Stav";
+  }
+  .expedicne-boxy-table td:nth-child(3)::before {
+    content: "Objednávka";
+  }
+  .expedicne-boxy-table td:nth-child(4)::before {
+    content: "Faktúra";
+  }
+  .expedicne-boxy-table td:nth-child(5)::before {
+    content: "Zákazník";
+  }
+  .expedicne-boxy-table td:nth-child(6)::before {
+    content: "Obsadený od";
+  }
+  .expedicne-boxy-table td:nth-child(7) {
+    grid-column: 1 / -1; border: 0;
+  }
+  .expedicne-boxy-table td:nth-child(2), .expedicne-boxy-table td:nth-child(4), .expedicne-boxy-table td:nth-child(6) {
+    border-right: 0;
+  }
+  .expedicne-boxy-table .button {
+    width: 100%;
+  }
+  .invoice-control-success {
+    min-height: calc(100vh - 142px); padding: 20px 10px;
+  }
+  .invoice-control-success strong {
+    font-size: 25px;
+  }
+  .box-assignment {
+    min-height: 330px;
+  }
+  .shipment-form {
+    max-width: none;
+  }
+  .shipment-panel_weights, .shipment-panel_keypad {
+    padding: 18px;
+  }
+  .shipment-parcel {
+    grid-template-columns: 64px minmax(0, 1fr) 28px 48px; gap: 6px;
+  }
+  .shipment-weight {
+    height: 64px; padding: 0 12px; font-size: 28px;
+  }
+  .shipment-parcel_remove {
+    width: 48px; height: 64px;
+  }
+  .shipment-keypad {
+    gap: 8px;
+  }
+  .shipment-keypad button {
+    height: 72px; font-size: 30px;
+  }
+  .shipment-submit_actions {
+    grid-template-columns: minmax(0, 1fr); gap: 8px;
+  }
+  .shipment-submit_actions .shipment-submit {
+    min-height: 62px;
+  }
+  .shipment-completed {
+    padding: 26px 16px;
+  }
+  .shipment-completed > strong {
+    font-size: 23px;
+  }
+  .shipment-back-button {
+    min-height: 64px; padding: 0 16px; font-size: 16px;
+  }
+  .footbar_inner {
+    gap: 0; padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .footbar_title {
+    display: none;
+  }
+  .footbar_search {
+    max-width: none; height: 54px;
+  }
+  .footbar_input {
+    height: 54px; padding: 0 12px; font-size: 16px;
+  }
+  .footbar_input::placeholder {
+    font-size: 12px;
+  }
+  .footbar_button {
+    min-width: 84px; height: 54px; padding: 0 12px;
+  }
+  .work-conflict-modal, .order-logs-modal {
+    padding: 10px;
+  }
+  .work-conflict-modal_dialog {
+    padding: 34px 18px 22px;
+  }
+  .work-conflict-modal_dialog > strong {
+    font-size: 21px;
+  }
+  .work-conflict-modal_dialog p {
+    margin: 14px 0 20px; font-size: 14px;
+  }
+  .order-logs-modal_dialog {
+    max-height: calc(100vh - 20px);
+  }
+  .order-logs-modal_header {
+    min-height: 70px; padding: 10px 12px 10px 16px;
+  }
+  .order-logs-modal_close {
+    width: 48px; height: 48px;
+  }
+  .order-logs-modal_body {
+    gap: 10px; padding: 10px;
+  }
+  .order-log {
+    padding: 14px;
+  }
+  .order-log_header {
+    flex-direction: column; gap: 8px;
+  }
+  .product-not-found {
+    padding: 20px;
+  }
+  .product-not-found_content small {
+    font-size: 14px;
+  }
+  .login-main {
+    align-items: flex-start; padding: 14px 10px;
+  }
+  .login-box {
+    max-width: none; padding: 28px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar_logout {
+    overflow: hidden; max-width: 102px; white-space: nowrap;
+  }
+  .box-assignment_form {
+    flex-direction: column; gap: 8px;
+  }
+  .box-assignment_input, .box-assignment_form .button {
+    width: 100%; height: 58px;
+  }
+  .shipment-panel_weights, .shipment-panel_keypad {
+    padding: 12px;
+  }
+  .shipment-cod {
+    padding: 14px;
+  }
+  .shipment-cod label {
+    align-items: flex-start; flex-direction: column;
+  }
+  .shipment-cod_value input {
+    height: 64px; font-size: 27px;
+  }
+  .shipment-parcel {
+    grid-template-columns: 52px minmax(0, 1fr) 24px 42px;
+  }
+  .shipment-parcel_label {
+    font-size: 12px;
+  }
+  .shipment-parcel_remove {
+    width: 42px;
+  }
+  .shipment-keypad button {
+    height: 64px;
+  }
+  .footbar_button {
+    min-width: 72px; padding: 0 8px; font-size: 13px;
+  }
+}
