@@ -11,6 +11,10 @@ a {
   color: inherit; text-decoration: none;
 }
 
+button {
+  border: none !important;
+}
+
 /* FARBY DOPRAVY - upravuj na tomto mieste */
 .data-table_shipping.shipping4, .invoice-summary_shipping.shipping4 {
   border-left-color: #e5a800 !important;

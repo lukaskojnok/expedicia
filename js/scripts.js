@@ -1,4 +1,4 @@
-function confirmAction(message, onConfirm) {
+function confirmAction(message, onConfirm, confirmButtonText) {
   if (!$("#app-confirm-modal-styles").length) {
     $("head").append(
       '<style id="app-confirm-modal-styles">' +
@@ -30,6 +30,7 @@ function confirmAction(message, onConfirm) {
   }
 
   $modal.find("#app-confirm-modal-message").text(message);
+  $modal.find(".app-confirm-modal-confirm").text(confirmButtonText || "Áno, potvrdiť");
   $modal.find(".app-confirm-modal-cancel, .app-confirm-modal_backdrop").on("click", closeModal);
 
   $modal.find(".app-confirm-modal-confirm").on("click", function() {
@@ -116,7 +117,7 @@ $(function() {
         alert(response.message || "Box sa nepodarilo uvoľniť.");
         $button.prop("disabled", false).text("Uvoľniť box");
       });
-    });
+    }, "Uvoľniť box");
   });
 });
 

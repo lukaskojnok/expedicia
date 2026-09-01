@@ -452,34 +452,37 @@ if (empty($page)) { //form
       $("[data-order-delete]").on("click", function() {
         const $button = $(this);
 
-        if (!window.confirm("Naozaj chcete vymazať objednávku aj všetky jej položky? Objednávka sa pri ďalšom importe môže nahrať nanovo.")) {
-          return;
-        }
+        confirmAction(
+          "Naozaj chcete vymazať objednávku?",
+          function() {
+            $button.prop("disabled", true).text("Vymazávam…");
 
-        $button.prop("disabled", true).text("Vymazávam…");
+            $.ajax({
+              url: "/scripts/delete_order.php",
+              method: "POST",
+              dataType: "json",
+              data: {
+                order_id: $button.data("order-id"),
+                csrf_token: $button.data("csrf-token")
+              }
+            }).done(function(response) {
+              if (response.success) {
+                showPreloader();
+                window.location.href = "/?typ=<?= urlencode($typ_kontroly) ?>";
+                return;
+              }
 
-        $.ajax({
-          url: "/scripts/delete_order.php",
-          method: "POST",
-          dataType: "json",
-          data: {
-            order_id: $button.data("order-id"),
-            csrf_token: $button.data("csrf-token")
-          }
-        }).done(function(response) {
-          if (response.success) {
-            showPreloader();
-            window.location.href = "/?typ=<?= urlencode($typ_kontroly) ?>";
-            return;
-          }
+              alert(response.message || "Objednávku sa nepodarilo vymazať.");
+              $button.prop("disabled", false).text("Vymazať objednávku");
+            }).fail(function(xhr) {
+              const response = xhr.responseJSON || {};
 
-          alert(response.message || "Objednávku sa nepodarilo vymazať.");
-          $button.prop("disabled", false).text("Vymazať objednávku");
-        }).fail(function(xhr) {
-          const response = xhr.responseJSON || {};
-          alert(response.message || "Objednávku sa nepodarilo vymazať.");
-          $button.prop("disabled", false).text("Vymazať objednávku");
-        });
+              alert(response.message || "Objednávku sa nepodarilo vymazať.");
+              $button.prop("disabled", false).text("Vymazať objednávku");
+            });
+          },
+          "Áno, vymazať"
+        );
       });
 
       $("#box-assignment-code").on("input", function() {
