@@ -3,6 +3,7 @@ ini_set("display_errors", "0");
 
 require_once __DIR__ . "/../config/common.php";
 require_once __DIR__ . "/../config/controls_log.php";
+require_once __DIR__ . "/pdf_labels.php";
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -323,6 +324,7 @@ $carrier_name = $shipping["name"] ?? $order["doprava_nazov"];
 $carrier_code = $shipping["carrier"] ?? $api;
 $reference = $carrier_response["reference"] ?? $order["cislo_objednavky"];
 $label_files = [];
+$print_file = [];
 $label_error = "";
 
 if ($message === "") {
@@ -363,12 +365,26 @@ if ($success) {
   $saved_labels = shipment_save_labels($carrier_response["labels"] ?? [], $order, $carrier_code);
   $label_files = $saved_labels["files"];
   $label_error = trim((string) $saved_labels["error"]);
+
+  if ($print_label && !empty($label_files)) {
+    $prepared_print = shipment_prepare_print_pdf($label_files, $order, $carrier_code);
+
+    if (!empty($prepared_print["success"])) {
+      $print_file = $prepared_print["file"];
+    } else {
+      $print_error = trim((string) ($prepared_print["error"] ?? ""));
+
+      if ($print_error !== "") {
+        $label_error = trim($label_error . " " . $print_error);
+      }
+    }
+  }
 }
 
 $label_files_json = !empty($label_files)
   ? json_encode($label_files, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
   : null;
-$label_path = $label_files[0]["path"] ?? null;
+$label_path = $print_file["path"] ?? ($label_files[0]["path"] ?? null);
 
 $query = $db->prepare("
   UPDATE orders SET
@@ -430,7 +446,7 @@ send_data_response(true, $message, 200, [
   "warning" => $label_error,
   "label_files" => $label_files,
   "label_url" => $label_files[0]["url"] ?? "",
-  "print_url" => $print_label && !empty($label_files)
+  "print_url" => $print_label && !empty($print_file)
     ? "/scripts/print_label.php?order_id=" . $order_id
     : ""
 ]);
