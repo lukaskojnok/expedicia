@@ -1,3 +1,52 @@
+function confirmAction(message, onConfirm) {
+  if (!$("#app-confirm-modal-styles").length) {
+    $("head").append(
+      '<style id="app-confirm-modal-styles">' +
+        '.app-confirm-modal{position:fixed;z-index:10000;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}' +
+        '.app-confirm-modal_backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}' +
+        '.app-confirm-modal_content{position:relative;width:min(100%,440px);padding:28px;border-radius:12px;background:#fff;box-shadow:0 16px 50px rgba(0,0,0,.3)}' +
+        '.app-confirm-modal_content p{margin:0;font-size:17px;line-height:1.45}' +
+        '.app-confirm-modal_actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}' +
+      '</style>'
+    );
+  }
+
+  const $modal = $(
+    '<div class="app-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="app-confirm-modal-message">' +
+      '<div class="app-confirm-modal_backdrop"></div>' +
+      '<div class="app-confirm-modal_content">' +
+        '<p id="app-confirm-modal-message"></p>' +
+        '<div class="app-confirm-modal_actions">' +
+          '<button type="button" class="button button-secondary app-confirm-modal-cancel">Zrušiť</button>' +
+          '<button type="button" class="button app-confirm-modal-confirm">Áno, uvoľniť</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  );
+
+  function closeModal() {
+    $modal.remove();
+    $(document).off("keydown.appConfirmModal");
+  }
+
+  $modal.find("#app-confirm-modal-message").text(message);
+  $modal.find(".app-confirm-modal-cancel, .app-confirm-modal_backdrop").on("click", closeModal);
+
+  $modal.find(".app-confirm-modal-confirm").on("click", function() {
+    closeModal();
+    onConfirm();
+  });
+
+  $(document).on("keydown.appConfirmModal", function(event) {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  });
+
+  $("body").append($modal);
+  $modal.find(".app-confirm-modal-cancel").trigger("focus");
+}
+
 $(function() {
   const $menuButton = $(".topbar-hamburger");
   const $menu = $("#topbar-dropdown-menu");
@@ -42,32 +91,31 @@ $(function() {
   $(document).on("click", ".expedicny-box-release", function() {
     const $button = $(this);
 
-    if (!window.confirm("Naozaj chcete manuálne uvoľniť tento expedičný box?")) {
-      return;
-    }
+    confirmAction("Naozaj chcete manuálne uvoľniť tento expedičný box?", function() {
+      $button.prop("disabled", true).text("Uvoľňujem…");
 
-    $button.prop("disabled", true).text("Uvoľňujem…");
+      $.ajax({
+        url: "/scripts/expedicny_box_release.php",
+        method: "POST",
+        dataType: "json",
+        data: {
+          box_id: $button.data("box-id"),
+          csrf_token: $("#expedicny-box-release-csrf").val()
+        }
+      }).done(function(response) {
+        if (response.success) {
+          window.location.reload();
+          return;
+        }
 
-    $.ajax({
-      url: "/scripts/expedicny_box_release.php",
-      method: "POST",
-      dataType: "json",
-      data: {
-        box_id: $button.data("box-id"),
-        csrf_token: $("#expedicny-box-release-csrf").val()
-      }
-    }).done(function(response) {
-      if (response.success) {
-        window.location.reload();
-        return;
-      }
+        alert(response.message || "Box sa nepodarilo uvoľniť.");
+        $button.prop("disabled", false).text("Uvoľniť box");
+      }).fail(function(xhr) {
+        const response = xhr.responseJSON || {};
 
-      alert(response.message || "Box sa nepodarilo uvoľniť.");
-      $button.prop("disabled", false).text("Uvoľniť box");
-    }).fail(function(xhr) {
-      const response = xhr.responseJSON || {};
-      alert(response.message || "Box sa nepodarilo uvoľniť.");
-      $button.prop("disabled", false).text("Uvoľniť box");
+        alert(response.message || "Box sa nepodarilo uvoľniť.");
+        $button.prop("disabled", false).text("Uvoľniť box");
+      });
     });
   });
 });
@@ -438,8 +486,6 @@ $(function() {
   });
 });
 
-
-
 function showPreloader() {
   $("#page-preloader").addClass("is-active").attr("aria-hidden", "false");
   $("body").addClass("preloader-active");
@@ -453,7 +499,6 @@ function hidePreloader() {
 $(window).on("pageshow", function() {
   hidePreloader();
 });
-
 
 $(function() {
   const $automaticUpdate = $("#automatic-order-update");
@@ -481,8 +526,6 @@ $(function() {
     }
   });
 });
-
-
 
 $(function() {
   const $barcodeInput = $("#barcode-input");
