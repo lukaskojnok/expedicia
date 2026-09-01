@@ -1,7 +1,0 @@
-{
-    "require": {
-        "nesbot/carbon": "^3.8",
-        "phpmailer/phpmailer": "^6.9",
-        "picqer/php-barcode-generator": "^3.2"
-    }
-}
