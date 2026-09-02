@@ -37,7 +37,8 @@ function auth_login($db, $admin) {
   $db->prepare("UPDATE admins SET date_login_last = NOW() WHERE id = :id")->execute([":id" => (int) $admin["id"]]);
   $query = $db->prepare("INSERT INTO admins_logs SET login = :login, session_id = :session_id, user_agent = :user_agent, ip = :ip, unique_code = :unique_code, date_login = NOW(), date_last_do = NOW()");
   $query->execute([":login" => $admin["login"], ":session_id" => $session_id, ":user_agent" => $user_agent, ":ip" => $ip, ":unique_code" => $unique_code]);
-  $db->exec("DELETE FROM order_update_logs WHERE started_at < DATE_SUB(NOW(), INTERVAL 1 MONTH)");
+  $db->exec("DELETE FROM order_update_logs WHERE started_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+  $db->exec("DELETE FROM controls_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
 }
 function auth_refresh_session($db) {
   if (!auth_is_logged_in()) {

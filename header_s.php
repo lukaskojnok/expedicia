@@ -201,6 +201,40 @@ if ($page === "invoice") {
   $topbar_count_label = "boxov";
   $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
 
+} elseif ($page === "logs") {
+  $query = $db->query("
+    SELECT
+      controls_logs.*,
+      orders.cislo_objednavky,
+      orders.cislo_faktury,
+      COALESCE(NULLIF(orders.dodacie_meno, ''), NULLIF(orders.fakturacne_meno, ''), '—') AS customer_name,
+      COALESCE(NULLIF(admins.name, ''), admins.login, CONCAT('User ID: ', controls_logs.user_id)) AS user_name
+    FROM controls_logs
+    LEFT JOIN orders ON orders.id = controls_logs.order_id
+    LEFT JOIN admins ON admins.id = controls_logs.user_id
+    WHERE controls_logs.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+    ORDER BY controls_logs.created_at DESC, controls_logs.id DESC
+    LIMIT 2000
+  ");
+  $logs = $query->fetchAll(PDO::FETCH_ASSOC);
+
+  $logs_admins = [];
+
+  foreach ($logs as $log) {
+    $log_user_id = (int) ($log["user_id"] ?? 0);
+
+    if ($log_user_id > 0) {
+      $logs_admins[$log_user_id] = (string) ($log["user_name"] ?? "User ID: " . $log_user_id);
+    }
+  }
+
+  natcasesort($logs_admins);
+
+  $page_title = "Všetky logy";
+  $topbar_count_value = count($logs);
+  $topbar_count_label = "záznamov";
+  $topbar_back_url = "/?typ=" . urlencode($typ_kontroly);
+
 } elseif ($page === "order-updates") {
   $today = new DateTimeImmutable("today");
   $order_update_presets = [

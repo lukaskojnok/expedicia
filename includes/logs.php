@@ -5,6 +5,7 @@ $logs_action_labels = [
   "work_taken_over" => "Prevzal rozpracovanú objednávku",
   "control_completed" => "Dokončil kontrolu položiek",
   "quick_control_completed" => "Dokončil rýchlu kontrolu",
+  "expedition_completed_without_control" => "Ukončil bez kontroly a expedovania",
   "carrier_sent" => "Odoslal zásielku dopravcovi",
   "box_assigned" => "Uložil objednávku do expedičného boxu"
 ];

@@ -7,7 +7,7 @@
       <div class="topbar_page">
         <h1>
           <span class="topbar_page-title-desktop"><?= htmlspecialchars($page_title, ENT_QUOTES, "UTF-8") ?></span>
-          <span class="topbar_page-title-mobile"><?= htmlspecialchars($page === "pozicie-sklad" ? "Pozície skladu" : ($page === "expedicne-boxy" ? "Expedičné boxy" : ($page === "order-updates" ? "Aktualizácie" : ($typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia"))), ENT_QUOTES, "UTF-8") ?></span>
+          <span class="topbar_page-title-mobile"><?= htmlspecialchars($page === "logs" ? "Logy" : ($page === "pozicie-sklad" ? "Pozície skladu" : ($page === "expedicne-boxy" ? "Expedičné boxy" : ($page === "order-updates" ? "Aktualizácie" : ($typ_kontroly === "vyskladnenie" ? "Vyskladnenie" : "Expedícia")))), ENT_QUOTES, "UTF-8") ?></span>
         </h1>
 
         <?php if ($topbar_count_value !== "") { ?>
@@ -36,8 +36,6 @@
             <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>&nbsp;
             Prepnúť na <?= $typ_kontroly === "vyskladnenie" ? "expedíciu" : "vyskladnenie" ?>
           </a>
-          <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
-          <a href="/?page=pozicie-sklad&typ=<?= urlencode($typ_kontroly) ?>">Pozície skladu</a>
           <div class="topbar-update-actions">
             <form method="post" action="/scripts/update_invoices.php">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
@@ -47,7 +45,10 @@
             </form>
             <a href="/?page=order-updates&amp;typ=<?= urlencode($typ_kontroly) ?>" aria-label="Možnosti a história aktualizácií" title="Možnosti a história aktualizácií">•••</a>
           </div>
-          <a href="/logout.php">Odhlásiť sa</a>
+          <a href="/?page=expedicne-boxy&typ=<?= urlencode($typ_kontroly) ?>">Expedičné boxy</a>
+          <a href="/?page=pozicie-sklad&typ=<?= urlencode($typ_kontroly) ?>">Pozície skladu</a>
+          <a href="/?page=logs&amp;typ=<?= urlencode($typ_kontroly) ?>">Všetky logy</a>
+          <a href="/logout.php" style="font-weight:bold;">Odhlásiť sa</a>
         </div>
       </div>
     </nav>
@@ -66,6 +67,8 @@
     require __DIR__ . "/includes/pozicie-sklad.php";
   } elseif ($page === "order-updates") {
     require __DIR__ . "/includes/order-updates.php";
+  } elseif ($page === "logs") {
+    require __DIR__ . "/includes/logs.php";
   } else {
     require __DIR__ . "/includes/invoices.php";
   }
