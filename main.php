@@ -136,10 +136,14 @@ if (empty($page)) { //form
           id="barcode-input"
           class="footbar_input"
           placeholder="Číslo objednávky, faktúry alebo expedičného boxu"
+          inputmode="none"
           autocomplete="off"
           autofocus
         >
 
+        <button type="button" class="footbar_keyboard-toggle" data-keyboard-toggle aria-pressed="false" aria-label="Zapnúť klávesnicu" title="Zapnúť klávesnicu" nofocus>
+          <i class="fa-solid fa-keyboard" aria-hidden="true"></i>
+        </button>
         <button type="submit" class="footbar_button">Nájsť</button>
       </form>
 
@@ -254,10 +258,14 @@ if (empty($page)) { //form
         id="barcode-input"
         class="footbar_input"
         placeholder="Kód produktu, expedičný box"
+        inputmode="none"
         autocomplete="off"
         autofocus
       >
 
+      <button type="button" class="footbar_keyboard-toggle" data-keyboard-toggle aria-pressed="false" aria-label="Zapnúť klávesnicu" title="Zapnúť klávesnicu" nofocus>
+        <i class="fa-solid fa-keyboard" aria-hidden="true"></i>
+      </button>
       <button type="submit" class="footbar_button">Nájsť</button>
     </form>
 

@@ -944,6 +944,15 @@ body.work-conflict-modal-open {
 .footbar_input::placeholder {
   font-size: 14px; font-weight: 400; color: #8a94a5;
 }
+.footbar_keyboard-toggle {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 56px; width: 56px; height: 56px; padding: 0; font-size: 20px; color: #39465b; background: #e9edf3; border: 0; border-left: 1px solid #d4dae4; cursor: pointer;
+}
+.footbar_keyboard-toggle:hover {
+  background: #dce3ed;
+}
+.footbar_keyboard-toggle.is-active {
+  color: #fff; background: #22a96b;
+}
 .footbar_button {
   display: inline-flex; align-items: center; justify-content: center; min-width: 130px; height: 56px; padding: 0 24px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; color: #fff; background: #246bfe; border: 0; border-radius: 0; cursor: pointer;
 }

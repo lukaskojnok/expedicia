@@ -51,4 +51,4 @@
 
     <title><?php echo $meta["title"] ?: $meta["title_primary"]; ?></title>
   </head>
-  <body>
+  <body class="body_<?= $typ_kontroly; ?>">

@@ -456,6 +456,9 @@
   .footbar_input::placeholder {
     font-size: 12px;
   }
+  .footbar_keyboard-toggle {
+    flex-basis: 54px; width: 54px; height: 54px;
+  }
   .footbar_button {
     min-width: 84px; height: 54px; padding: 0 12px;
   }

@@ -92,11 +92,9 @@ if ($page === "invoice") {
   }
 
   $query = $db->prepare("
-    SELECT orders.*, working_admin.name AS working_user_name
+    SELECT *
     FROM orders
-    LEFT JOIN admins AS working_admin
-      ON working_admin.id = orders.{$user_column}
-    WHERE orders.id = :id
+    WHERE id = :id
     LIMIT 1
   ");
 

@@ -530,10 +530,29 @@ $(function() {
 
 $(function() {
   const $barcodeInput = $("#barcode-input");
+  const $keyboardToggle = $("[data-keyboard-toggle]");
 
   if (!$barcodeInput.length) {
     return;
   }
+
+  $keyboardToggle.on("click", function() {
+    const manualMode = $barcodeInput.attr("inputmode") === "text";
+    const nextManualMode = !manualMode;
+
+    $barcodeInput.attr("inputmode", nextManualMode ? "text" : "none");
+    $keyboardToggle
+      .toggleClass("is-active", nextManualMode)
+      .attr("aria-pressed", nextManualMode ? "true" : "false")
+      .attr("aria-label", nextManualMode ? "Skryť klávesnicu" : "Zapnúť klávesnicu")
+      .attr("title", nextManualMode ? "Skryť klávesnicu" : "Zapnúť klávesnicu");
+
+    $barcodeInput.trigger("blur");
+
+    window.setTimeout(function() {
+      $barcodeInput.trigger("focus");
+    }, 100);
+  });
 
   $(document).on("click", function(e) {
     if ($(e.target).closest("[nofocus]").length) {
