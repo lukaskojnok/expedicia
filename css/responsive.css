@@ -279,15 +279,16 @@
   .invoices-table .data-table_empty {
     display: block; grid-column: 1 / -1; padding: 35px 15px; border: 0;
   }
-  .invoice-summary_vyskladnenie, .invoice-summary_expedicia {
-  display: none;
-}
+  /* .invoice-summary_vyskladnenie, .invoice-summary_expedicia {
+    display: none;
+  } */
   .invoice-summary {
     position: static;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       "objednavka customer"
       "suma shipping"
+      "vyskladnenie expedicia"
       "actions actions";
     margin-bottom: 10px; box-shadow: none;
   }

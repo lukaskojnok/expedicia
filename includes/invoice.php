@@ -203,7 +203,6 @@ usort($items, function ($item_a, $item_b) {
 <?php if ($typ_kontroly === "vyskladnenie") { ?>
   <div class="box-scan-status" id="box-scan-status" hidden>
     <div>
-      <span>Načítaný expedičný box</span>
       <strong id="box-scan-status-code"></strong>
     </div>
     <button type="button" id="box-scan-status-remove" nofocus>Zrušiť box</button>
