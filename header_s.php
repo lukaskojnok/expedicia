@@ -122,7 +122,7 @@ if ($page === "invoice") {
     SELECT *
     FROM orders_items
     WHERE order_id = :order_id
-      AND type = 'product'
+      AND (type = 'product' OR type = 'other')
     ORDER BY id ASC
   ");
 
@@ -134,11 +134,10 @@ if ($page === "invoice") {
   $query = $db->prepare("
     SELECT id, kod, order_id
     FROM expedicne_boxy
-    WHERE order_id IS NULL OR order_id = :order_id
     ORDER BY kod ASC
   ");
-  $query->execute([":order_id" => $order_id]);
-  $available_expedicne_boxy = $query->fetchAll(PDO::FETCH_ASSOC);
+  $query->execute();
+  $expedicne_boxy_na_skenovanie = $query->fetchAll(PDO::FETCH_ASSOC);
   $pocet_poloziek = 0;
 
   foreach ($items as $item) {
@@ -323,7 +322,7 @@ if ($page === "invoice") {
         order_id,
         SUM(
           CASE
-            WHEN type = 'product' THEN mnozstvo
+            WHEN type = 'product' OR type = 'other' THEN mnozstvo
             ELSE 0
           END
         ) AS pocet_poloziek
@@ -350,5 +349,5 @@ if ($page === "invoice") {
   $topbar_count_label = "faktúr";
 }
 
-$meta["title"] = $page_title;
+$meta["title"] = "Expedícia";
 ?>

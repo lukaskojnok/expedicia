@@ -199,6 +199,16 @@ usort($items, function ($item_a, $item_b) {
 
 </section>
 
+<?php if ($typ_kontroly === "vyskladnenie") { ?>
+  <div class="box-scan-status" id="box-scan-status" hidden>
+    <div>
+      <span>Načítaný expedičný box</span>
+      <strong id="box-scan-status-code"></strong>
+    </div>
+    <button type="button" id="box-scan-status-remove" nofocus>Zrušiť box</button>
+  </div>
+<?php } ?>
+
 <div class="table-box" id="invoice-items-box">
 
   <table class="data-table invoice-items-table">
@@ -289,6 +299,7 @@ usort($items, function ($item_a, $item_b) {
         <button type="submit" class="button">Uložiť do boxu</button>
       </form>
       <div class="box-assignment_message" id="box-assignment-message" aria-live="polite"></div>
+      <a href="/?typ=vyskladnenie" class="shipment-back-button box-assignment_back">Späť na objednávky bez boxu</a>
     </div>
     <div class="shipment-completed" id="box-assignment-completed" hidden>
       <strong>Objednávka je pripravená na expedíciu</strong>

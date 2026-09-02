@@ -357,6 +357,9 @@
   .box-assignment {
     min-height: 330px;
   }
+  .box-scan-status {
+    width: calc(100% - 20px); margin: 10px auto; padding: 12px;
+  }
   .shipment-form {
     max-width: none;
   }
@@ -461,6 +464,12 @@
   }
   .box-assignment_form {
     flex-direction: column; gap: 8px;
+  }
+  .box-scan-status, .box-scan-status > div {
+    align-items: stretch; flex-direction: column; gap: 8px;
+  }
+  .box-scan-status button {
+    width: 100%;
   }
   .box-assignment_input, .box-assignment_form .button {
     width: 100%; height: 58px;

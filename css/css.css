@@ -530,6 +530,24 @@ body.work-conflict-modal-open {
 .invoice-control-success span {
   display: block; font-size: 16px; color: #38785b;
 }
+.box-scan-status {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; width: calc(100% - 40px); max-width: 720px; margin: 20px auto; padding: 14px 18px; color: #172033; background: #e7f6ed; border: 2px solid #21a366;
+}
+.box-scan-status[hidden] {
+  display: none;
+}
+.box-scan-status > div {
+  display: flex; align-items: center; gap: 12px;
+}
+.box-scan-status span {
+  font-size: 14px; color: #38785b;
+}
+.box-scan-status strong {
+  font-size: 20px; color: #146c43;
+}
+.box-scan-status button {
+  min-height: 42px; padding: 0 16px; font-family: inherit; font-weight: 700; color: #9b1c1c; background: #fff; border: 1px solid #d7a2a2; cursor: pointer;
+}
 .box-assignment {
   display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px;
 }
@@ -562,6 +580,9 @@ body.work-conflict-modal-open {
 }
 .box-assignment_message.is-success {
   color: #14673d;
+}
+.box-assignment_back {
+  margin-top: 10px;
 }
 .expedicne-boxy-table strong {
   font-size: 18px; color: #172033;

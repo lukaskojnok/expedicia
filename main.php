@@ -264,8 +264,20 @@ if (empty($page)) { //form
       const $notFoundTitle = $("#product-not-found-title");
       const $notFoundCodes = $("#product-not-found-codes");
       const quickControl = "<?= htmlspecialchars((string) ($_GET["quick"] ?? ""), ENT_QUOTES, "UTF-8") ?>";
+      const currentOrderId = <?= (int) $order_id ?>;
+      const expeditionBoxRows = <?= json_encode($expedicne_boxy_na_skenovanie ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+      const expeditionBoxes = {};
+      let pendingBoxCode = "";
       let controlLogSent = false;
       let $scanErrorFocusInput = $barcodeInput;
+
+      $.each(expeditionBoxRows, function(index, box) {
+        const code = String(box.kod || "").trim().toUpperCase();
+
+        if (code !== "") {
+          expeditionBoxes[code] = box;
+        }
+      });
 
       function logSuccessfulControl() {
         if (controlLogSent) {
@@ -343,6 +355,12 @@ if (empty($page)) { //form
           logSuccessfulControl();
 
           setTimeout(function() {
+            if (pendingBoxCode !== "" && $("#box-assignment-form").length) {
+              $("#box-assignment-code").val(pendingBoxCode);
+              $("#box-assignment-form").trigger("submit");
+              return;
+            }
+
             const $nextInput = $("#box-assignment-code").length
               ? $("#box-assignment-code")
               : $(".shipment-weight").first();
@@ -356,6 +374,25 @@ if (empty($page)) { //form
 
         if (code === "") {
           $barcodeInput.trigger("focus");
+          return;
+        }
+
+        const normalizedCode = code.toUpperCase();
+        const expeditionBox = expeditionBoxes[normalizedCode];
+
+        if (expeditionBox) {
+          const assignedOrderId = parseInt(expeditionBox.order_id, 10) || 0;
+
+          if (assignedOrderId > 0 && assignedOrderId !== currentOrderId) {
+            showScanError("Expedičný box už obsahuje inú objednávku", normalizedCode);
+            return;
+          }
+
+          pendingBoxCode = normalizedCode;
+          $("#box-assignment-code").val(pendingBoxCode);
+          $("#box-scan-status-code").text(pendingBoxCode);
+          $("#box-scan-status").removeAttr("hidden");
+          $barcodeInput.val("").trigger("focus");
           return;
         }
 
@@ -426,6 +463,14 @@ if (empty($page)) { //form
         $("#barcode-form-item").trigger("submit");
       });
 
+      $("#box-scan-status-remove").on("click", function() {
+        pendingBoxCode = "";
+        $("#box-assignment-code").val("");
+        $("#box-scan-status-code").text("");
+        $("#box-scan-status").attr("hidden", "hidden");
+        $barcodeInput.trigger("focus");
+      });
+
       const $shipmentForm = $("#shipment-form");
       const $boxAssignmentForm = $("#box-assignment-form");
       const $invoiceActionsToggle = $(".invoice-actions_toggle");
@@ -485,28 +530,15 @@ if (empty($page)) { //form
         );
       });
 
-      $("#box-assignment-code").on("input", function() {
-        if (String($(this).val() || "").trim() !== "") {
-          $("#box-assignment-select").val("");
-        }
-      });
-
-      $("#box-assignment-select").on("change", function() {
-        if (String($(this).val() || "").trim() !== "") {
-          $("#box-assignment-code").val("");
-        }
-      });
-
       $boxAssignmentForm.on("submit", function(event) {
         event.preventDefault();
 
         const $codeInput = $("#box-assignment-code");
-        const $boxSelect = $("#box-assignment-select");
         const $message = $("#box-assignment-message");
-        const code = String($codeInput.val() || $boxSelect.val() || "").trim();
+        const code = String($codeInput.val() || "").trim();
 
         if (code === "") {
-          $boxSelect.trigger("focus");
+          $codeInput.trigger("focus");
           return;
         }
 
@@ -534,6 +566,8 @@ if (empty($page)) { //form
 
           $("#box-assignment").attr("hidden", "hidden");
           $("#box-assignment-completed").removeAttr("hidden");
+          pendingBoxCode = "";
+          $("#box-scan-status").attr("hidden", "hidden");
         }).fail(function(xhr) {
           const response = xhr.responseJSON || {};
           $message.removeClass("is-error is-success").text("");
