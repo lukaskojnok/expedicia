@@ -94,7 +94,7 @@ usort($items, function ($item_a, $item_b) {
 
 <section class="invoice-summary">
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_cisloobjednavky">
     <span>Objednávka</span>
     <strong nofocus><?= htmlspecialchars($order["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?></strong>
   </div>
@@ -110,17 +110,17 @@ usort($items, function ($item_a, $item_b) {
     <small><?= htmlspecialchars($zakaznik_mesto, ENT_QUOTES, "UTF-8") ?></small>
   </div>
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_datum">
     <span>Dátum</span>
     <strong><?= htmlspecialchars($datum, ENT_QUOTES, "UTF-8") ?></strong>
   </div>
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_pocetpoloziek">
     <span>Položky</span>
     <strong><?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?></strong>
   </div>
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_suma">
     <span>Suma</span>
     <strong><?= htmlspecialchars($suma_objednavky, ENT_QUOTES, "UTF-8") ?> <?= htmlspecialchars($mena, ENT_QUOTES, "UTF-8") ?></strong>
 
@@ -133,7 +133,7 @@ usort($items, function ($item_a, $item_b) {
     <?php } ?>
   </div>
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_vyskladnenie">
     <span>Vyskladnenie</span>
     <strong>
       <button
@@ -149,7 +149,7 @@ usort($items, function ($item_a, $item_b) {
     </strong>
   </div>
 
-  <div class="invoice-summary_item">
+  <div class="invoice-summary_item invoice-summary_expedicia">
     <span>Expedícia</span>
     <strong>
       <button
@@ -187,6 +187,7 @@ usort($items, function ($item_a, $item_b) {
     <div class="invoice-actions_menu" id="invoice-actions-menu" hidden>
       <a href="/invoice?id=<?= (int) $order["id"] ?>&amp;typ=vyskladnenie&amp;quick=vyskladnenie">Rýchle vyskladnenie</a>
       <a href="/invoice?id=<?= (int) $order["id"] ?>&amp;typ=expedicia&amp;quick=expedicia">Rýchla expedícia</a>
+      <button type="button" data-order-complete-without-expedition data-order-id="<?= (int) $order["id"] ?>" data-csrf-token="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">Vybaviť bez expedovania</button>
       <button
         type="button"
         class="invoice-action_delete"

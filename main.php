@@ -39,7 +39,8 @@
           <div class="topbar-update-actions">
             <form method="post" action="/scripts/update_invoices.php">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-              <input type="hidden" name="request_type" value="quick">
+              <!-- <input type="hidden" name="request_type" value="quick"> -->
+              <input type="hidden" name="request_type" value="today">
               <input type="hidden" name="return_to" value="home">
               <button type="submit">Aktualizovať objednávky</button>
             </form>
@@ -252,7 +253,7 @@ if (empty($page)) { //form
         name="code"
         id="barcode-input"
         class="footbar_input"
-        placeholder="Kód produktu"
+        placeholder="Kód produktu, expedičný box"
         autocomplete="off"
         autofocus
       >

@@ -47,7 +47,7 @@
     <link rel="shortcut icon" href="/img/favicon/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Expedícia" />
-    <link rel="manifest" href="/img/favicon/site.webmanifest" />
+    <link rel="manifest" href="/img/favicon/site.webmanifest?v2" />
 
     <title><?php echo $meta["title"] ?: $meta["title_primary"]; ?></title>
   </head>

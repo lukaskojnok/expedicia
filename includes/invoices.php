@@ -6,8 +6,8 @@
         <!-- <th>Číslo faktúry</th> -->
         <th>Objednávka</th>
         <th>E-shop</th>
-        <th>Zákazník</th>
         <th>Doprava</th>
+        <th>Zákazník</th>
         <th>Dátum</th>
         <th>Položky</th>
         <th>Suma</th>
@@ -113,7 +113,7 @@
               </div>
             </td> -->
 
-            <td>
+            <td class="data-table_cisloobjednavky">
               <strong>
                 <?= htmlspecialchars($result["cislo_objednavky"], ENT_QUOTES, "UTF-8") ?>
               </strong>
@@ -129,16 +129,6 @@
                   <?= htmlspecialchars($zdroj, ENT_QUOTES, "UTF-8") ?>
                 </div>
               <?php } ?>
-            </td>
-
-            <td>
-              <div class="table-main-text">
-                <?= htmlspecialchars($zakaznik_meno, ENT_QUOTES, "UTF-8") ?>
-              </div>
-
-              <div class="table-sub-text">
-                <?= htmlspecialchars($zakaznik_mesto, ENT_QUOTES, "UTF-8") ?>
-              </div>
             </td>
 
             <td class="data-table_shipping <?= htmlspecialchars($shipping_class, ENT_QUOTES, "UTF-8") ?>">
@@ -165,11 +155,21 @@
               <?php } ?>
             </td>
 
-            <td align="center">
+            <td class="data-table_customer">
+              <div class="table-main-text">
+                <?= htmlspecialchars($zakaznik_meno, ENT_QUOTES, "UTF-8") ?>
+              </div>
+
+              <div class="table-sub-text">
+                <?= htmlspecialchars($zakaznik_mesto, ENT_QUOTES, "UTF-8") ?>
+              </div>
+            </td>
+
+            <td class="data-table_datum" align="center">
               <?= htmlspecialchars($datum, ENT_QUOTES, "UTF-8") ?>
             </td>
 
-            <td align="center">
+            <td class="data-table_pocetpoloziek" align="center">
               <?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?>
             </td>
 
@@ -186,7 +186,7 @@
               <?php } ?>
             </td>
 
-            <td>
+            <td class="data-table_status">
               <button
                 type="button"
                 class="status order-logs-open <?= htmlspecialchars($status_classes[$status_vyskladnenie] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
@@ -208,7 +208,7 @@
               <?php } ?>
             </td>
 
-            <td>
+            <td class="data-table_status2">
               <button
                 type="button"
                 class="status order-logs-open <?= htmlspecialchars($status_classes[$status_expedicia] ?? "status-waiting", ENT_QUOTES, "UTF-8") ?>"
