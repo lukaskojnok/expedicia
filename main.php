@@ -442,7 +442,7 @@ if (empty($page)) { //form
           showSuccessfulControl();
         } else {
           $row.removeAttr("hidden");
-          $row.closest("tbody").prepend($row);
+          // $row.closest("tbody").prepend($row);
           $highlightCells.addClass("is-counted");
         }
 

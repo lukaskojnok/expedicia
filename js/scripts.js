@@ -562,3 +562,23 @@ $(function() {
     $barcodeInput.trigger("focus");
   });
 });
+
+
+$(function() {
+  const $summaryToggle = $(".invoice-summary_toggle");
+  const $summary = $("#invoice-summary");
+
+  if (!$summaryToggle.length || !$summary.length) {
+    return;
+  }
+
+  $summaryToggle.on("click", function() {
+    const isOpen = $summary.hasClass("is-open");
+
+    $summary.toggleClass("is-open", !isOpen);
+
+    $summaryToggle
+      .attr("aria-expanded", isOpen ? "false" : "true")
+      .text(isOpen ? "Viac info" : "Menej info");
+  });
+});

@@ -92,7 +92,15 @@ usort($items, function ($item_a, $item_b) {
 ?>
 
 
-<section class="invoice-summary">
+<button
+  type="button"
+  class="invoice-summary_toggle"
+  aria-expanded="false"
+  aria-controls="invoice-summary"
+  nofocus
+>Viac info</button>
+
+<section class="invoice-summary" id="invoice-summary">
 
   <div class="invoice-summary_item invoice-summary_cisloobjednavky">
     <span>Objednávka</span>
@@ -295,7 +303,7 @@ usort($items, function ($item_a, $item_b) {
       <span>Naskenujte expedičný box, do ktorého ste objednávku uložili.</span>
       <form class="box-assignment_form" id="box-assignment-form" nofocus>
         <input type="hidden" id="box-assignment-csrf" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-        <input type="text" id="box-assignment-code" class="box-assignment_input" placeholder="Kód expedičného boxu" autocomplete="off">
+        <input type="text" id="box-assignment-code" class="box-assignment_input" placeholder="Kód expedičného boxu" autocomplete="off" inputmode="none">
         <button type="submit" class="button">Uložiť do boxu</button>
       </form>
       <div class="box-assignment_message" id="box-assignment-message" aria-live="polite"></div>
