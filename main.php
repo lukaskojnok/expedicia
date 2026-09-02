@@ -530,6 +530,42 @@ if (empty($page)) { //form
         );
       });
 
+      $("[data-order-complete-without-expedition]").on("click", function() {
+        const $button = $(this);
+
+        confirmAction(
+          "Objednávka sa označí ako ukončená bez kontroly, bez štítku a bez odoslania kuriérovi. Pokračovať?",
+          function() {
+            $button.prop("disabled", true).text("Ukončujem…");
+
+            $.ajax({
+              url: "/scripts/complete_without_expedition.php",
+              method: "POST",
+              dataType: "json",
+              data: {
+                order_id: $button.data("order-id"),
+                csrf_token: $button.data("csrf-token")
+              }
+            }).done(function(response) {
+              if (response.success) {
+                showPreloader();
+                window.location.href = "/?typ=expedicia";
+                return;
+              }
+
+              alert(response.message || "Objednávku sa nepodarilo ukončiť.");
+              $button.prop("disabled", false).text("Vybaviť bez expedovania");
+            }).fail(function(xhr) {
+              const response = xhr.responseJSON || {};
+
+              alert(response.message || "Objednávku sa nepodarilo ukončiť.");
+              $button.prop("disabled", false).text("Vybaviť bez expedovania");
+            });
+          },
+          "Áno, vybaviť bez expedovania"
+        );
+      });
+
       $boxAssignmentForm.on("submit", function(event) {
         event.preventDefault();
 
