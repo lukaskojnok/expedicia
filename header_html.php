@@ -49,6 +49,8 @@
     <meta name="apple-mobile-web-app-title" content="Expedícia" />
     <link rel="manifest" href="/img/favicon/site.webmanifest?v2" />
 
+    <link rel="stylesheet" href="/js/fancybox/fancybox.css">
+
     <title><?php echo $meta["title"] ?: $meta["title_primary"]; ?></title>
   </head>
   <body class="body_<?= $typ_kontroly; ?>">

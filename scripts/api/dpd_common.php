@@ -29,7 +29,7 @@ function dpd_country_code($country) {
   return 703;
 }
 
-function dpd_normalized_response($success, $message, $http_code, $response_code, $response, $reference, $labels = []) {
+function dpd_normalized_response($success, $message, $http_code, $response_code, $response, $reference, $labels = [], $package_numbers = []) {
   return [
     "success" => $success,
     "message" => $message,
@@ -37,7 +37,8 @@ function dpd_normalized_response($success, $message, $http_code, $response_code,
     "response_code" => $response_code,
     "response" => $response,
     "reference" => $reference,
-    "labels" => $labels
+    "labels" => $labels,
+    "package_numbers" => $package_numbers
   ];
 }
 
@@ -283,6 +284,8 @@ function dpd_create_shipment($shipment_data, $parcelshop_id = "") {
   }
 
   $labels = dpd_extract_labels($response_data);
+  $mpsid = trim((string) ($shipment_result["mpsid"] ?? ""));
+  $package_numbers = $mpsid !== "" ? [$mpsid] : [];
 
-  return dpd_normalized_response(true, "Zásielka bola úspešne odoslaná do DPD.", $http_code, 200, (string) $response, $reference, $labels);
+  return dpd_normalized_response(true, "Zásielka bola úspešne odoslaná do DPD.", $http_code, 200, (string) $response, $reference, $labels, $package_numbers);
 }

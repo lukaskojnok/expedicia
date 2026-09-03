@@ -287,8 +287,8 @@ button {
 .data-table tbody tr.row-changed:hover td {
   background: #ffefb8;
 }
-.data-table tbody tr.row-completed {
-  opacity: .5;
+.data-table tbody tr.row-completed td {
+  background-color: #fff !important; opacity: .35;
 }
 .order-number {
   display: flex; align-items: center; gap: 10px;

@@ -20,7 +20,7 @@ $error = "";
 $admins_stmt = $db->query("
   SELECT *
   FROM admins
-  ORDER BY login ASC
+  ORDER BY name ASC
 ");
 
 $admins = $admins_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -84,7 +84,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="/css/css.css?v<?= filemtime(__DIR__ . "/css/css.css") ?>" rel="stylesheet">
 
-    <title>Prihlásenie | Expedícia</title>
+    <link rel="icon" type="image/png" href="/img/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/img/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/img/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Expedícia" />
+    <link rel="manifest" href="/img/favicon/site.webmanifest?v2" />
+
+    <title>Expedícia</title>
   </head>
 
   <body class="login-page">

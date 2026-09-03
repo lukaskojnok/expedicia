@@ -49,6 +49,48 @@ function shipment_order_is_cod($order) {
   return $payment_code === "BILLING3" || strpos($payment_name, "dobier") !== false;
 }
 
+function shipment_change_shoptet_order_status($order_code, $status_id, $token) {
+  $url = "https://api.myshoptet.com/api/orders/"
+    . rawurlencode((string) $order_code)
+    . "/status";
+  $payload = json_encode([
+    "data" => [
+      "statusId" => (int) $status_id
+    ]
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  $curl = curl_init($url);
+
+  curl_setopt_array($curl, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST => "PATCH",
+    CURLOPT_POSTFIELDS => $payload,
+    CURLOPT_HTTPHEADER => [
+      "Shoptet-Private-API-Token: " . $token,
+      "Content-Type: application/json"
+    ],
+    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_TIMEOUT => 30
+  ]);
+
+  $raw_response = curl_exec($curl);
+  $curl_error = curl_error($curl);
+  $http_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+  curl_close($curl);
+
+  $response = is_string($raw_response) ? json_decode($raw_response, true) : null;
+  $success = $curl_error === "" && $http_code >= 200 && $http_code < 300;
+  $message = $success
+    ? "Stav objednávky v Shoptete bol zmenený na vybavená."
+    : ($response["errors"][0]["message"] ?? ($curl_error !== "" ? $curl_error : "Shoptet vrátil HTTP kód {$http_code}."));
+
+  return [
+    "success" => $success,
+    "http_code" => $http_code,
+    "message" => $message,
+    "response" => $response ?? $raw_response
+  ];
+}
+
 function shipment_download_label($url) {
   $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
 
@@ -425,6 +467,32 @@ $query->execute([
   ":id" => $order_id
 ]);
 
+$shoptet_result = null;
+$shoptet_warning = "";
+$change_shoptet_status = defined("ZMENIT_STAV_OBJEDNAVKY_V_SHOPTETE")
+  && ZMENIT_STAV_OBJEDNAVKY_V_SHOPTETE === true;
+$completed_status_id = defined("STAVY_OBJEDNAVOK")
+  ? (STAVY_OBJEDNAVOK["vybavena"] ?? null)
+  : null;
+$is_personal_pickup = $api === "osobne";
+
+if ($success && !$is_personal_pickup && $change_shoptet_status) {
+  if ($completed_status_id === null || $completed_status_id === "") {
+    $shoptet_warning = "Zásielka bola odoslaná, ale v STAVY_OBJEDNAVOK chýba stav vybavena.";
+  } else {
+    $shoptet_result = shipment_change_shoptet_order_status(
+      $order["cislo_objednavky"],
+      $completed_status_id,
+      SHOPTET_API
+    );
+
+    if (empty($shoptet_result["success"])) {
+      $shoptet_warning = "Zásielka bola odoslaná, ale stav objednávky v Shoptete sa nepodarilo zmeniť: "
+        . ($shoptet_result["message"] ?? "Neznáma chyba.");
+    }
+  }
+}
+
 controls_add_log($db, $order_id, $user_id, $typ_kontroly, "carrier_sent", $success ? "success" : "error", [
   "finished" => $success,
   "carrier" => $carrier_name,
@@ -433,7 +501,12 @@ controls_add_log($db, $order_id, $user_id, $typ_kontroly, "carrier_sent", $succe
   "api_response" => $api_response,
   "label_files" => $label_files_json,
   "print_requested" => $print_label,
-  "message" => $label_error !== "" ? $message . " " . $label_error : $message
+  "shoptet_status_change_enabled" => $change_shoptet_status,
+  "shoptet_status_id" => $completed_status_id,
+  "shoptet_success" => $shoptet_result["success"] ?? null,
+  "shoptet_http_code" => $shoptet_result["http_code"] ?? null,
+  "shoptet_message" => $shoptet_result["message"] ?? null,
+  "message" => trim($message . " " . $label_error . " " . $shoptet_warning)
 ]);
 
 if (!$success) {
@@ -442,8 +515,10 @@ if (!$success) {
   ]);
 }
 
+$warnings = array_filter([$label_error, $shoptet_warning]);
+
 send_data_response(true, $message, 200, [
-  "warning" => $label_error,
+  "warning" => implode(" ", $warnings),
   "label_files" => $label_files,
   "label_url" => $label_files[0]["url"] ?? "",
   "print_url" => $print_label && !empty($print_file)

@@ -8,6 +8,11 @@ $DOPRAVA_KODY = [
 define("DOPRAVA_KODY", $DOPRAVA_KODY);
 
 
+define("STAVY_OBJEDNAVOK", [
+  "vybavena" => "-3"
+]);
+define("ZMENIT_STAV_OBJEDNAVKY_V_SHOPTETE", true);
+
 $GLOBALS["pageURL2"] = "expedicia.kojnok.sk";
 
 if (substr($_SERVER["DOCUMENT_ROOT"], -1) == "/") {

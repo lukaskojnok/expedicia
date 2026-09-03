@@ -1,78 +1,237 @@
 <?php
+ini_set("display_errors", "0");
 
-declare(strict_types=1);
+include __DIR__ . "/config/common.php";
 
-require_once __DIR__ . '/vendor/autoload.php';
+exit;
 
-use setasign\Fpdi\Fpdi;
+$shoptet_private_api_token = SHOPTET_API;
 
-$tempFiles = [];
+/**
+ * Zmení stav objednávky v Shoptete.
+ *
+ * @param string $order_code Číslo objednávky, napr. 2026001532
+ * @param int $status_id ID cieľového stavu v Shoptete
+ * @param string $token Private API token
+ */
+function changeShoptetOrderStatus($order_code, $status_id, $token) {
+  $url = "https://api.myshoptet.com/api/orders/"
+    . rawurlencode($order_code)
+    . "/status";
 
-try {
-  /*
-   * 1. TEST FPDF
-   * Vytvoríme dve samostatné PDF.
-   */
-  for ($i = 1; $i <= 2; $i++) {
-    $filePath = sys_get_temp_dir() . '/fpdi-test-' . uniqid('', true) . '-' . $i . '.pdf';
-    $tempFiles[] = $filePath;
+  $data = [
+    "data" => [
+      "statusId" => (int) $status_id
+    ]
+  ];
 
-    $pdf = new FPDF('P', 'mm', 'A4');
-    $pdf->AddPage();
-    $pdf->SetFont('Arial', 'B', 20);
-    $pdf->Cell(0, 15, 'TEST PDF - strana ' . $i, 0, 1, 'C');
+  $ch = curl_init($url);
 
-    $pdf->SetFont('Arial', '', 12);
-    $pdf->Ln(10);
-    $pdf->MultiCell(
-      0,
-      8,
-      'Toto PDF bolo vytvorene pomocou kniznice setasign/fpdf.'
-    );
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST => "PATCH",
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_HTTPHEADER => [
+      "Shoptet-Private-API-Token: " . $token,
+      "Content-Type: application/json"
+    ],
+    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_TIMEOUT => 30
+  ]);
 
-    $pdf->Output('F', $filePath);
+  $raw_response = curl_exec($ch);
+  $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curl_error = curl_error($ch);
 
-    if (!is_file($filePath) || filesize($filePath) === 0) {
-      throw new RuntimeException('Nepodarilo sa vytvorit testovacie PDF cislo ' . $i . '.');
-    }
+  curl_close($ch);
+
+  if ($raw_response === false) {
+    return [
+      "success" => false,
+      "http_code" => $http_code,
+      "message" => "Chyba CURL: " . $curl_error
+    ];
   }
 
-  /*
-   * 2. TEST FPDI
-   * Obe vytvorené PDF spojíme do jedného.
-   */
-  $mergedPdf = new Fpdi();
+  $response = json_decode($raw_response, true);
 
-  foreach ($tempFiles as $filePath) {
-    $pageCount = $mergedPdf->setSourceFile($filePath);
-
-    for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-      $templateId = $mergedPdf->importPage($pageNumber);
-      $pageSize = $mergedPdf->getTemplateSize($templateId);
-
-      $mergedPdf->AddPage(
-        $pageSize['orientation'],
-        [$pageSize['width'], $pageSize['height']]
-      );
-
-      $mergedPdf->useTemplate($templateId);
-    }
+  if ($http_code < 200 || $http_code >= 300) {
+    return [
+      "success" => false,
+      "http_code" => $http_code,
+      "message" => $response["errors"][0]["message"] ?? "Shoptet vrátil chybu.",
+      "response" => $response
+    ];
   }
 
-  /*
-   * 3. Výsledok zobrazíme priamo v prehliadači.
-   */
-  $mergedPdf->Output('I', 'fpdf-fpdi-test.pdf');
-} catch (Throwable $e) {
-  http_response_code(500);
-  header('Content-Type: text/plain; charset=UTF-8');
-
-  echo "TEST NEUSPESNY\n\n";
-  echo 'Chyba: ' . $e->getMessage();
-} finally {
-  foreach ($tempFiles as $filePath) {
-    if (is_file($filePath)) {
-      unlink($filePath);
-    }
-  }
+  return [
+    "success" => true,
+    "http_code" => $http_code,
+    "message" => "Stav objednávky bol zmenený.",
+    "response" => $response
+  ];
 }
+
+
+// POUŽITIE:
+
+$order_code = "2026001542";
+$status_id = "-3"; // Sem vlož skutočné ID stavu v tvojom Shoptete
+
+$result = changeShoptetOrderStatus(
+  $order_code,
+  $status_id,
+  $shoptet_private_api_token
+);
+
+if ($result["success"]) {
+  echo "OK: " . $result["message"];
+} else {
+  echo "CHYBA: " . $result["message"];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit;
+
+header("Content-Type: application/json; charset=utf-8");
+
+$required_constants = [
+  "DPD_URL",
+  "DPD_KEY",
+  "DPD_EMAIL",
+  "DPD_DELIS_ID",
+  "DPD_ZVOZOVA_ADRESA_1"
+];
+$missing_constants = array_values(array_filter($required_constants, function($name) {
+  return !defined($name);
+}));
+
+if (!empty($missing_constants)) {
+  http_response_code(500);
+  echo json_encode([
+    "error" => "Chýbajú DPD konštanty v config/psw.php.",
+    "missing" => $missing_constants
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+  exit;
+}
+
+/*
+ * Pred spustením zmeň údaje príjemcu na skutočnú testovaciu adresu.
+ * Referencia musí byť pri každom pokuse jedinečná.
+ */
+$reference = "DPD-TEST-" . date("Ymd-His");
+
+$request_data = [
+  "jsonrpc" => "2.0",
+  "method" => "create",
+  "params" => [
+    "DPDSecurity" => [
+      "SecurityToken" => [
+        "ClientKey" => DPD_KEY,
+        "Email" => DPD_EMAIL
+      ]
+    ],
+    "shipment" => [[
+      "reference" => $reference,
+      "delisId" => DPD_DELIS_ID,
+      "note" => "Test viacbalíkovej zásielky " . $reference,
+      "product" => 9,
+      "addressSender" => [
+        "id" => (int) DPD_ZVOZOVA_ADRESA_1
+      ],
+      "addressRecipient" => [
+        "type" => "b2c",
+        "name" => "TEST PRIJEMCA",
+        "street" => "DOPLN ULICU",
+        "houseNumber" => "1",
+        "zip" => "01001",
+        "country" => 703,
+        "city" => "Zilina",
+        "phone" => "+421900000000",
+        "email" => "test@example.com",
+        "note" => ""
+      ],
+      "parcels" => [
+        "parcel" => [
+          [
+            "reference1" => $reference,
+            "reference2" => "BALIK-1",
+            "weight" => 1,
+            "height" => 20,
+            "width" => 20,
+            "depth" => 20
+          ],
+          [
+            "reference1" => $reference,
+            "reference2" => "BALIK-2",
+            "weight" => 1,
+            "height" => 20,
+            "width" => 20,
+            "depth" => 20
+          ]
+        ]
+      ]
+    ]]
+  ],
+  "id" => $reference
+];
+
+$json = json_encode($request_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$response_headers = [];
+$curl = curl_init(DPD_URL);
+
+curl_setopt_array($curl, [
+  CURLOPT_POST => true,
+  CURLOPT_POSTFIELDS => $json,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_CONNECTTIMEOUT => 10,
+  CURLOPT_TIMEOUT => 60,
+  CURLOPT_HTTPHEADER => [
+    "Content-Type: application/json",
+    "Accept: application/json"
+  ],
+  CURLOPT_HEADERFUNCTION => function($curl, $header_line) use (&$response_headers) {
+    $response_headers[] = rtrim($header_line, "\r\n");
+    return strlen($header_line);
+  }
+]);
+
+$raw_response = curl_exec($curl);
+$curl_error_number = curl_errno($curl);
+$curl_error = curl_error($curl);
+$curl_info = curl_getinfo($curl);
+$http_code = (int) ($curl_info["http_code"] ?? 0);
+curl_close($curl);
+
+/*
+ * Nevypisujeme request, pretože obsahuje ClientKey.
+ * DPD response zostáva úplne neupravená v raw_response.
+ */
+http_response_code($http_code > 0 ? $http_code : 502);
+echo json_encode([
+  "test_reference" => $reference,
+  "curl_errno" => $curl_error_number,
+  "curl_error" => $curl_error,
+  "curl_info" => $curl_info,
+  "response_headers" => $response_headers,
+  "raw_response" => $raw_response,
+  "decoded_response" => is_string($raw_response) ? json_decode($raw_response, true) : null,
+  "json_decode_error" => is_string($raw_response) ? json_last_error_msg() : null
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);

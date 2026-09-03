@@ -244,10 +244,16 @@ usort($items, function ($item_a, $item_b) {
           <tr row_item_id="<?= htmlspecialchars($item["kod"], ENT_QUOTES, "UTF-8"); ?>">
             <td class="invoice-item_image">
               <?php if ($produkt_obrazok !== "") { ?>
-                <img
-                  src="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8"); ?>"
-                  alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?>"
+                <a
+                  href="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8"); ?>"
+                  data-fancybox="invoice-products"
+                  data-caption="<?= "#$produkt_kod - {$item["nazov"]} ::: $produkt_poloha"; ?>"
                 >
+                  <img
+                    src="<?= htmlspecialchars($produkt_obrazok, ENT_QUOTES, "UTF-8"); ?>"
+                    alt="<?= htmlspecialchars($item["nazov"], ENT_QUOTES, "UTF-8"); ?>"
+                  >
+                </a>
               <?php } ?>
             </td>
 

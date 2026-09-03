@@ -1,7 +1,7 @@
 <?php
 
-function packeta_normalized_response($success, $message, $http_code, $response_code, $response, $reference, $labels = []) {
-  return ["success" => $success, "message" => $message, "http_code" => $http_code, "response_code" => $response_code, "response" => $response, "reference" => $reference, "labels" => $labels];
+function packeta_normalized_response($success, $message, $http_code, $response_code, $response, $reference, $labels = [], $package_numbers = []) {
+  return ["success" => $success, "message" => $message, "http_code" => $http_code, "response_code" => $response_code, "response" => $response, "reference" => $reference, "labels" => $labels, "package_numbers" => $package_numbers];
 }
 
 function packeta_api_password() {
@@ -238,6 +238,7 @@ function packeta_send_shipment($shipment_data) {
   }
   $packet_results = [];
   $packet_ids = [];
+  $package_numbers = [];
   $last_http_code = 0;
   foreach ($weights as $index => $weight) {
     $packet_reference = count($weights) > 1 ? $reference . "-" . ($index + 1) : $reference;
@@ -280,7 +281,9 @@ function packeta_send_shipment($shipment_data) {
       return packeta_normalized_response(false, "Packeta nevrátila ID vytvorenej zásielky.", $last_http_code, 502, $api_result["response"], $reference);
     }
     $packet_ids[] = $packet_id;
-    $packet_results[] = ["number" => $packet_reference, "id" => $packet_id, "barcode" => (string) ($response_data["result"]["barcode"] ?? ""), "response" => $response_data];
+    $barcode = trim((string) ($response_data["result"]["barcode"] ?? ""));
+    $package_numbers[] = $barcode !== "" ? $barcode : $packet_id;
+    $packet_results[] = ["number" => $packet_reference, "id" => $packet_id, "barcode" => $barcode, "response" => $response_data];
   }
   $label_result = packeta_download_labels($api_password, $packet_ids);
   $labels = $label_result["labels"] ?? [];
@@ -295,7 +298,7 @@ function packeta_send_shipment($shipment_data) {
   if ($label_error !== "") {
     $message .= " " . $label_error;
   }
-  return packeta_normalized_response(true, $message, $last_http_code, 200, $log_response, implode(", ", $packet_ids), $labels);
+  return packeta_normalized_response(true, $message, $last_http_code, 200, $log_response, implode(", ", $packet_ids), $labels, $package_numbers);
 }
 
 $carrier_response = packeta_send_shipment($shipment_data);

@@ -15,10 +15,16 @@ if (!$ADMIN_DATA || $ADMIN_DATA["login"] !== $_SESSION["admin_login"]) {
 }
 
 $unique_code = (string) ($_SESSION["admin_unique_code"] ?? "");
-if ($unique_code !== "") {
-  $db->prepare("UPDATE admins_logs SET date_last_do = NOW() WHERE unique_code = :unique_code")->execute([":unique_code" => $unique_code]);
-}
 
+if ($unique_code !== "") {
+  $db->prepare("
+    UPDATE admins_logs
+    SET date_last_do = NOW()
+    WHERE unique_code = :unique_code
+  ")->execute([
+    ":unique_code" => $unique_code
+  ]);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -113,9 +119,17 @@ if ($page === "invoice") {
   $control_user_id = (int) ($admin_data["id"] ?? 0);
 
   if ($control_user_id > 0) {
-    controls_add_log($db, $order_id, $control_user_id, $typ_kontroly, "invoice_opened", "opened", [
-      "message" => "Otvorený detail objednávky."
-    ]);
+    controls_add_log(
+      $db,
+      $order_id,
+      $control_user_id,
+      $typ_kontroly,
+      "invoice_opened",
+      "opened",
+      [
+        "message" => "Otvorený detail objednávky."
+      ]
+    );
   }
 
   $query = $db->prepare("
@@ -131,12 +145,15 @@ if ($page === "invoice") {
   ]);
 
   $items = $query->fetchAll(PDO::FETCH_ASSOC);
+
   $query = $db->prepare("
     SELECT id, kod, order_id
     FROM expedicne_boxy
     ORDER BY kod ASC
   ");
+
   $query->execute();
+
   $expedicne_boxy_na_skenovanie = $query->fetchAll(PDO::FETCH_ASSOC);
   $pocet_poloziek = 0;
 
@@ -152,13 +169,29 @@ if ($page === "invoice") {
   $status_label = $status_labels[$status] ?? $status;
   $status_class = $status_classes[$status] ?? "status-waiting";
 
-  $zakaznik_meno = $order["fakturacne_meno"] ?: $order["dodacie_meno"] ?: "—";
-  $zakaznik_mesto = $order["dodacie_mesto"] ?: $order["fakturacne_mesto"] ?: "—";
+  $zakaznik_meno = $order["fakturacne_meno"]
+    ?: $order["dodacie_meno"]
+    ?: "—";
+
+  $zakaznik_mesto = $order["dodacie_mesto"]
+    ?: $order["fakturacne_mesto"]
+    ?: "—";
+
   $shipping_data = DOPRAVA_KODY[$order["doprava_kod"]] ?? null;
   $shipping_class = $shipping_data["class"] ?? "shipping-unknown";
-  $doprava_nazov = ($shipping_data["name"] ?? "") ?: ($order["doprava_nazov"] ?: "Neuvedená doprava");
+
+  $doprava_nazov = ($shipping_data["name"] ?? "")
+    ?: ($order["doprava_nazov"] ?: "Neuvedená doprava");
+
   $mena = $order["mena"] ?: "EUR";
-  $suma_objednavky = number_format((float) $order["cena_na_uhradu"], 2, ",", " ");
+
+  $suma_objednavky = number_format(
+    (float) $order["cena_na_uhradu"],
+    2,
+    ",",
+    " "
+  );
+
   $je_dobierka = order_is_cod($order);
   $je_neuhradene_bez_dobierky = !$je_dobierka && empty($order["uhradene"]);
   $datum = "—";
@@ -191,9 +224,11 @@ if ($page === "invoice") {
       orders.dodacie_meno,
       orders.fakturacne_meno
     FROM expedicne_boxy
-    LEFT JOIN orders ON orders.id = expedicne_boxy.order_id
+    LEFT JOIN orders
+      ON orders.id = expedicne_boxy.order_id
     ORDER BY expedicne_boxy.kod ASC
   ");
+
   $expedicne_boxy = $query->fetchAll(PDO::FETCH_ASSOC);
 
   $page_title = "Expedičné boxy";
@@ -207,24 +242,38 @@ if ($page === "invoice") {
       controls_logs.*,
       orders.cislo_objednavky,
       orders.cislo_faktury,
-      COALESCE(NULLIF(orders.dodacie_meno, ''), NULLIF(orders.fakturacne_meno, ''), '—') AS customer_name,
-      COALESCE(NULLIF(admins.name, ''), admins.login, CONCAT('User ID: ', controls_logs.user_id)) AS user_name
+      COALESCE(
+        NULLIF(orders.dodacie_meno, ''),
+        NULLIF(orders.fakturacne_meno, ''),
+        '—'
+      ) AS customer_name,
+      COALESCE(
+        NULLIF(admins.name, ''),
+        admins.login,
+        CONCAT('User ID: ', controls_logs.user_id)
+      ) AS user_name
     FROM controls_logs
-    LEFT JOIN orders ON orders.id = controls_logs.order_id
-    LEFT JOIN admins ON admins.id = controls_logs.user_id
+    LEFT JOIN orders
+      ON orders.id = controls_logs.order_id
+    LEFT JOIN admins
+      ON admins.id = controls_logs.user_id
     WHERE controls_logs.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-    ORDER BY controls_logs.created_at DESC, controls_logs.id DESC
+    ORDER BY
+      controls_logs.created_at DESC,
+      controls_logs.id DESC
     LIMIT 2000
   ");
-  $logs = $query->fetchAll(PDO::FETCH_ASSOC);
 
+  $logs = $query->fetchAll(PDO::FETCH_ASSOC);
   $logs_admins = [];
 
   foreach ($logs as $log) {
     $log_user_id = (int) ($log["user_id"] ?? 0);
 
     if ($log_user_id > 0) {
-      $logs_admins[$log_user_id] = (string) ($log["user_name"] ?? "User ID: " . $log_user_id);
+      $logs_admins[$log_user_id] = (string) (
+        $log["user_name"] ?? "User ID: " . $log_user_id
+      );
     }
   }
 
@@ -237,6 +286,7 @@ if ($page === "invoice") {
 
 } elseif ($page === "order-updates") {
   $today = new DateTimeImmutable("today");
+
   $order_update_presets = [
     "today" => [
       "label" => "Od dnes",
@@ -257,10 +307,14 @@ if ($page === "invoice") {
       order_update_logs.*,
       admins.name AS admin_name
     FROM order_update_logs
-    LEFT JOIN admins ON admins.id = order_update_logs.admin_id
-    ORDER BY order_update_logs.started_at DESC, order_update_logs.id DESC
+    LEFT JOIN admins
+      ON admins.id = order_update_logs.admin_id
+    ORDER BY
+      order_update_logs.started_at DESC,
+      order_update_logs.id DESC
     LIMIT 200
   ");
+
   $order_update_logs = $query->fetchAll(PDO::FETCH_ASSOC);
 
   $page_title = "Aktualizácie objednávok";
@@ -270,7 +324,8 @@ if ($page === "invoice") {
 
 } elseif ($page === "pozicie-sklad") {
   $pozicie_sklad_error = "";
-  $pozicie_sklad_saved = isset($_GET["saved"]) && $_GET["saved"] === "1";
+  $pozicie_sklad_saved = isset($_GET["saved"])
+    && $_GET["saved"] === "1";
 
   if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $csrf_token = $_POST["csrf_token"] ?? "";
@@ -278,43 +333,99 @@ if ($page === "invoice") {
     if (!auth_csrf_is_valid($csrf_token)) {
       $pozicie_sklad_error = "Platnosť formulára vypršala. Obnovte stránku a skúste to znova.";
     } else {
-      $pozicie_input = str_replace(["\r\n", "\r"], "\n", (string) ($_POST["pozicie"] ?? ""));
+      $pozicie_input = str_replace(
+        ["\r\n", "\r"],
+        "\n",
+        (string) ($_POST["pozicie"] ?? "")
+      );
+
       $pozicie_riadky = preg_split('/\n/', $pozicie_input);
-      $pozicie_riadky = array_values(array_filter(array_map("trim", $pozicie_riadky), function ($pozicia) {
-        return $pozicia !== "";
-      }));
+
+      $pozicie_riadky = array_values(array_filter(
+        array_map("trim", $pozicie_riadky),
+        function ($pozicia) {
+          return $pozicia !== "";
+        }
+      ));
+
       $pozicie_text = implode("\r\n", $pozicie_riadky);
 
-      $query = $db->prepare("SELECT id FROM pozicie_sklad WHERE sklad = :sklad ORDER BY id ASC LIMIT 1");
-      $query->execute([":sklad" => 1]);
+      $query = $db->prepare("
+        SELECT id
+        FROM pozicie_sklad
+        WHERE sklad = :sklad
+        ORDER BY id ASC
+        LIMIT 1
+      ");
+
+      $query->execute([
+        ":sklad" => 1
+      ]);
+
       $pozicie_sklad_id = (int) $query->fetchColumn();
 
       if ($pozicie_sklad_id > 0) {
-        $query = $db->prepare("UPDATE pozicie_sklad SET pozicie = :pozicie WHERE id = :id");
+        $query = $db->prepare("
+          UPDATE pozicie_sklad
+          SET pozicie = :pozicie
+          WHERE id = :id
+        ");
+
         $query->execute([
           ":pozicie" => $pozicie_text,
           ":id" => $pozicie_sklad_id
         ]);
       } else {
-        $query = $db->prepare("INSERT INTO pozicie_sklad (sklad, pozicie) VALUES (:sklad, :pozicie)");
+        $query = $db->prepare("
+          INSERT INTO pozicie_sklad (sklad, pozicie)
+          VALUES (:sklad, :pozicie)
+        ");
+
         $query->execute([
           ":sklad" => 1,
           ":pozicie" => $pozicie_text
         ]);
       }
 
-      header("Location: /?page=pozicie-sklad&typ=" . urlencode($typ_kontroly) . "&saved=1");
+      header(
+        "Location: /?page=pozicie-sklad&typ="
+        . urlencode($typ_kontroly)
+        . "&saved=1"
+      );
+
       exit;
     }
   }
 
-  $query = $db->prepare("SELECT pozicie FROM pozicie_sklad WHERE sklad = :sklad ORDER BY id ASC LIMIT 1");
-  $query->execute([":sklad" => 1]);
+  $query = $db->prepare("
+    SELECT pozicie
+    FROM pozicie_sklad
+    WHERE sklad = :sklad
+    ORDER BY id ASC
+    LIMIT 1
+  ");
+
+  $query->execute([
+    ":sklad" => 1
+  ]);
+
   $pozicie_sklad_text = (string) ($query->fetchColumn() ?: "");
-  $pozicie_sklad_text = str_replace(["\r\n", "\r"], "\n", $pozicie_sklad_text);
-  $pozicie_sklad_count = count(array_filter(array_map("trim", preg_split('/\n/', $pozicie_sklad_text)), function ($pozicia) {
-    return $pozicia !== "";
-  }));
+
+  $pozicie_sklad_text = str_replace(
+    ["\r\n", "\r"],
+    "\n",
+    $pozicie_sklad_text
+  );
+
+  $pozicie_sklad_count = count(array_filter(
+    array_map(
+      "trim",
+      preg_split('/\n/', $pozicie_sklad_text)
+    ),
+    function ($pozicia) {
+      return $pozicia !== "";
+    }
+  ));
 
   $page_title = "Pozície skladu";
   $topbar_count_value = $pozicie_sklad_count;
@@ -323,7 +434,16 @@ if ($page === "invoice") {
 
 } else {
   if ($typ_kontroly === "vyskladnenie") {
-    $orders_where_sql = "orders.status_vyskladnenie IN ('nove', 'v_procese')";
+    /*
+     * VYSKLADNENIE:
+     * - zobrazí iba nové a rozpracované vyskladnenia,
+     * - nezobrazí objednávky, ktorých expedícia už bola ukončená.
+     */
+    $orders_where_sql = "
+      orders.status_vyskladnenie IN ('nove', 'v_procese')
+      AND orders.status_expedicia != 'ukoncene'
+    ";
+
     $orders_status_order_sql = "
       CASE orders.status_vyskladnenie
         WHEN 'nove' THEN 1
@@ -332,7 +452,19 @@ if ($page === "invoice") {
       END
     ";
   } else {
-    $orders_where_sql = "orders.status_vyskladnenie = 'ukoncene'";
+    /*
+     * EXPEDÍCIA:
+     * - zobrazí objednávky pripravené na expedíciu,
+     * - zobrazí aj ukončené expedície napriek tomu, že ich
+     *   status_vyskladnenie zostal omylom v stave v_procese.
+     */
+    $orders_where_sql = "
+      (
+        orders.status_vyskladnenie = 'ukoncene'
+        OR orders.status_expedicia = 'ukoncene'
+      )
+    ";
+
     $orders_status_order_sql = "
       CASE orders.status_expedicia
         WHEN 'nove' THEN 1
@@ -356,7 +488,8 @@ if ($page === "invoice") {
         order_id,
         SUM(
           CASE
-            WHEN type = 'product' OR type = 'other' THEN mnozstvo
+            WHEN type = 'product' OR type = 'other'
+              THEN mnozstvo
             ELSE 0
           END
         ) AS pocet_poloziek
@@ -364,7 +497,8 @@ if ($page === "invoice") {
       GROUP BY order_id
     ) AS items_count
       ON items_count.order_id = orders.id
-    WHERE {$orders_where_sql} AND doprava_typ != 'NULL'
+    WHERE ({$orders_where_sql})
+      AND orders.doprava_typ != 'NULL'
     ORDER BY
       {$orders_status_order_sql},
       orders.zmena DESC,
