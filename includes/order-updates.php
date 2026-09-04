@@ -16,6 +16,7 @@
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
           <input type="hidden" name="request_type" value="<?= htmlspecialchars($preset_key, ENT_QUOTES, "UTF-8") ?>">
           <input type="hidden" name="return_to" value="updates">
+          <input type="hidden" name="typ" value="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
           <button type="submit" class="button button-light">
             <?= htmlspecialchars($preset["label"], ENT_QUOTES, "UTF-8") ?>
             <small>od <?= htmlspecialchars($preset["date"], ENT_QUOTES, "UTF-8") ?></small>
@@ -28,6 +29,7 @@
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(auth_csrf_token(), ENT_QUOTES, "UTF-8") ?>">
       <input type="hidden" name="request_type" value="custom">
       <input type="hidden" name="return_to" value="updates">
+      <input type="hidden" name="typ" value="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
       <label for="order-update-date">Vlastný dátum od</label>
       <input type="date" name="date_from" id="order-update-date" value="<?= htmlspecialchars(date("Y-m-d"), ENT_QUOTES, "UTF-8") ?>" max="<?= htmlspecialchars(date("Y-m-d"), ENT_QUOTES, "UTF-8") ?>" required>
       <button type="submit" class="button">Aktualizovať od zvoleného dátumu</button>

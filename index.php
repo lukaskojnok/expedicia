@@ -14,7 +14,7 @@ $allowed_tokens = [
 ];
 
 $current_ip = $_SERVER["REMOTE_ADDR"] ?? "";
-$saved_token = $_COOKIE["company_access_token"] ?? "";
+$saved_token = $_COOKIE["company_access_token_expedicia"] ?? "";
 
 function find_allowed_company(string $token, array $allowed_tokens): ?string {
   if ($token === "") {
@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $allowed_company = find_allowed_company($submitted_token, $allowed_tokens);
 
   if ($allowed_company !== null) {
-    setcookie("company_access_token", $submitted_token, [
-      "expires" => time() + (365 * 24 * 60 * 60),
+    setcookie("company_access_token_expedicia", $submitted_token, [
+      "expires" => time() + (30 * 24 * 60 * 60),
       "path" => "/",
       "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
       "httponly" => true,

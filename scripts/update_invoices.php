@@ -189,6 +189,12 @@ $update_time_from_url = rawurlencode($update_time_from);
 $url = "https://www.okfish.sk/export/ordersFeed.xml?patternId=53&partnerId=4&hash={$shoptet_orders_hash}&updateTimeFrom={$update_time_from_url}";
 $admin_id = $is_cron ? null : (int) ($_SESSION["admin_id"] ?? 0);
 $return_to = (!$is_cron && ($request_data["return_to"] ?? "") === "updates") ? "updates" : "home";
+$return_typ = in_array(($request_data["typ"] ?? ""), ["vyskladnenie", "expedicia"], true)
+  ? (string) $request_data["typ"]
+  : "vyskladnenie";
+$return_url = $return_to === "updates"
+  ? "/?page=order-updates&typ=" . rawurlencode($return_typ)
+  : "/?typ=" . rawurlencode($return_typ);
 
 try {
   $query = $db->prepare("
@@ -703,7 +709,7 @@ try {
     "success" => true,
     "message" => $success_message
   ];
-  header("Location: " . ($return_to === "updates" ? "/?page=order-updates" : "/"));
+  header("Location: " . $return_url);
   exit;
 } catch (Throwable $e) {
   if ($db->inTransaction()) {
@@ -735,6 +741,6 @@ try {
     "success" => false,
     "message" => $error_message
   ];
-  header("Location: /?page=order-updates");
+  header("Location: " . $return_url);
   exit;
 }

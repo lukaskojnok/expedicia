@@ -42,6 +42,7 @@
               <!-- <input type="hidden" name="request_type" value="quick"> -->
               <input type="hidden" name="request_type" value="today">
               <input type="hidden" name="return_to" value="home">
+              <input type="hidden" name="typ" value="<?= htmlspecialchars($typ_kontroly, ENT_QUOTES, "UTF-8") ?>">
               <button type="submit">Aktualizovať objednávky</button>
             </form>
             <a href="/?page=order-updates&amp;typ=<?= urlencode($typ_kontroly) ?>" aria-label="Možnosti a história aktualizácií" title="Možnosti a história aktualizácií">•••</a>
