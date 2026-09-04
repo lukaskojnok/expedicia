@@ -1,4 +1,6 @@
 <?php
+include_once("config/psw.php");
+
 $allowed_ips = [
   "45.152.96.6dd",
 ];
@@ -8,10 +10,6 @@ if ( isset($_GET["a"])) {
   $allowed_ips = [
   ];
 }
-
-$allowed_tokens = [
-  "firma_1" => "f1_7Kp92VmQx4Nc8Rt3Zd6Hs1Wy5Ab9Ejf",
-];
 
 $current_ip = $_SERVER["REMOTE_ADDR"] ?? "";
 $saved_token = $_COOKIE["company_access_token_expedicia"] ?? "";
