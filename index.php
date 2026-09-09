@@ -44,6 +44,31 @@ if ($ip_is_allowed || $allowed_company !== null) {
  */
 $error_message = "";
 
+/**
+ * Automatické prihlásenie cez token v URL:
+ * https://expokfish.kojnok.sk/?t=TOKEN
+ */
+$url_token = trim((string) ($_GET["t"] ?? ""));
+
+if ($url_token !== "") {
+  $allowed_company = find_allowed_company($url_token, $allowed_tokens);
+
+  if ($allowed_company !== null) {
+    setcookie("company_access_token_expedicia", $url_token, [
+      "expires" => time() + (30 * 24 * 60 * 60),
+      "path" => "/",
+      "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
+      "httponly" => true,
+      "samesite" => "Strict",
+    ]);
+
+    header("Location: /");
+    exit;
+  }
+
+  $error_message = "Token v odkaze nie je platný.";
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $submitted_token = trim((string) ($_POST["access_token"] ?? ""));
   $allowed_company = find_allowed_company($submitted_token, $allowed_tokens);

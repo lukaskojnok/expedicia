@@ -467,6 +467,11 @@ $query->execute([
   ":id" => $order_id
 ]);
 
+if ($success) {
+  $query = $db->prepare("UPDATE expedicne_boxy SET order_id = NULL, obsadeny_at = NULL WHERE order_id = :order_id");
+  $query->execute([":order_id" => $order_id]);
+}
+
 $shoptet_result = null;
 $shoptet_warning = "";
 $change_shoptet_status = defined("ZMENIT_STAV_OBJEDNAVKY_V_SHOPTETE")

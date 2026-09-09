@@ -57,6 +57,11 @@ $query->execute([
   ":id" => $order_id
 ]);
 
+if ($typ_kontroly === "expedicia" && $new_status === "ukoncene") {
+  $query = $db->prepare("UPDATE expedicne_boxy SET order_id = NULL, obsadeny_at = NULL WHERE order_id = :order_id");
+  $query->execute([":order_id" => $order_id]);
+}
+
 controls_add_log($db, $order_id, $user_id, $typ_kontroly, $is_quick ? "quick_control_completed" : "control_completed", "success", [
   "finished" => $new_status === "ukoncene",
   "message" => $is_personal_pickup

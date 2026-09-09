@@ -125,7 +125,11 @@ usort($items, function ($item_a, $item_b) {
 
   <div class="invoice-summary_item invoice-summary_pocetpoloziek">
     <span>Položky</span>
-    <strong><?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?></strong>
+    <div class="">
+      <strong><?= htmlspecialchars((string) $pocet_druhov_poloziek, ENT_QUOTES, "UTF-8") ?></strong>
+      /
+      <strong><?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?></strong>
+    </div><!--  -->
   </div>
 
   <div class="invoice-summary_item invoice-summary_suma">

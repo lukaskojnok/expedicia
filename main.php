@@ -2,7 +2,7 @@
   <div class="topbar_inner">
 
     <div class="topbar_left">
-      <a href="/" class="topbar_logo">Expedícia</a>
+      <a href="/?typ=<?= urlencode($typ_kontroly) ?>" class="topbar_logo">Expedícia</a>
 
       <div class="topbar_page">
         <h1>

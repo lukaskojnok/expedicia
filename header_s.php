@@ -156,9 +156,11 @@ if ($page === "invoice") {
 
   $expedicne_boxy_na_skenovanie = $query->fetchAll(PDO::FETCH_ASSOC);
   $pocet_poloziek = 0;
+  $pocet_druhov_poloziek = 0;
 
   foreach ($items as $item) {
     $pocet_poloziek += (float) $item["mnozstvo"];
+    $pocet_druhov_poloziek++;
   }
 
   if (floor($pocet_poloziek) === $pocet_poloziek) {
@@ -455,13 +457,17 @@ if ($page === "invoice") {
     /*
      * EXPEDÍCIA:
      * - zobrazí objednávky pripravené na expedíciu,
-     * - zobrazí aj ukončené expedície napriek tomu, že ich
-     *   status_vyskladnenie zostal omylom v stave v_procese.
+     * - ukončené expedície zobrazí iba v deň ich ukončenia,
+     * - od nasledujúceho dňa sa ukončené expedície už nezobrazujú.
      */
     $orders_where_sql = "
       (
         orders.status_vyskladnenie = 'ukoncene'
-        OR orders.status_expedicia = 'ukoncene'
+        AND orders.status_expedicia != 'ukoncene'
+      )
+      OR (
+        orders.status_expedicia = 'ukoncene'
+        AND DATE(orders.updated_at) = CURDATE()
       )
     ";
 
@@ -479,7 +485,8 @@ if ($page === "invoice") {
     SELECT
       orders.*,
       working_admin.name AS working_user_name,
-      COALESCE(items_count.pocet_poloziek, 0) AS pocet_poloziek
+      COALESCE(items_count.pocet_poloziek, 0) AS pocet_poloziek,
+      COALESCE(items_count.pocet_druhov_poloziek, 0) AS pocet_druhov_poloziek
     FROM orders
     LEFT JOIN admins AS working_admin
       ON working_admin.id = orders.{$user_column}
@@ -492,7 +499,13 @@ if ($page === "invoice") {
               THEN mnozstvo
             ELSE 0
           END
-        ) AS pocet_poloziek
+        ) AS pocet_poloziek,
+        COUNT(
+          CASE
+            WHEN type = 'product' OR type = 'other'
+              THEN 1
+          END
+        ) AS pocet_druhov_poloziek
       FROM orders_items
       GROUP BY order_id
     ) AS items_count

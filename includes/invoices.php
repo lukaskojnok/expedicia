@@ -56,9 +56,14 @@
           }
 
           $pocet_poloziek = (float) $result["pocet_poloziek"];
+          $pocet_druhov_poloziek = (float) $result["pocet_druhov_poloziek"];
 
           if (floor($pocet_poloziek) === $pocet_poloziek) {
             $pocet_poloziek = (int) $pocet_poloziek;
+          }
+
+          if (floor($pocet_druhov_poloziek) === $pocet_druhov_poloziek) {
+            $pocet_druhov_poloziek = (int) $pocet_druhov_poloziek;
           }
 
           if ($status === "nove") {
@@ -170,6 +175,8 @@
             </td>
 
             <td class="data-table_pocetpoloziek" align="center">
+              <?= htmlspecialchars((string) $pocet_druhov_poloziek, ENT_QUOTES, "UTF-8") ?>
+              /
               <?= htmlspecialchars((string) $pocet_poloziek, ENT_QUOTES, "UTF-8") ?>
             </td>
 
